@@ -15,6 +15,9 @@ libraryDependencies ++= Seq(
   "org.tpolecat" %% "doobie-hikari" % DoobieVersion,
 )
 
+
+// Scalac configuration as seen in https://tpolecat.github.io/2017/04/25/scalac-flags.html
+
 scalacOptions ++= Seq(
   // format: off
   "-deprecation", // Emit warning and location for usages of deprecated APIs.

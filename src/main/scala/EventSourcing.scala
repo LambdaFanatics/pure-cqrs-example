@@ -42,13 +42,16 @@ class PlantRepositoryInMemoryInterpreter[F[_]: Applicative] extends PlantReposit
 
   def get(plantId: PlantId): F[Option[Plant]] = cache.get(plantId).pure[F]
 
-  def findByName(name: String): F[Set[Plant]] = ???
+  def findByName(name: String): F[Set[Plant]] = cache.values
+    .filter(p => p.name == name)
+    .toSet
+    .pure[F]
 }
 
 object RunningJob extends App {
-  def program0[F[_]: Async](repo: PlantRepository[F]): F[(Option[Plant], Option[Plant])] = for {
+  def program0[F[_]: Async](repo: PlantRepository[F]) /*: F[(Option[Plant], Set[Plant])]*/ = for {
     p1  <- repo.get("1")
-    p2  <- repo.get("2")
+    p2  <- repo.findByName("plant 1")
   } yield (p1, p2)
 
 
