@@ -1,7 +1,5 @@
 package infrastructure.repository
 package doobie
-
-
 import domain._
 
 
