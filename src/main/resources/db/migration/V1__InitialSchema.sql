@@ -1,5 +1,5 @@
 CREATE TABLE plants (
     id VARCHAR PRIMARY KEY,
-    name VARCHAR NOT NULL,
+    name VARCHAR  UNIQUE NOT NULL,
     country VARCHAR NOT NULL
 )

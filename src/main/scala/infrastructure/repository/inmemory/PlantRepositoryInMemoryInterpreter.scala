@@ -16,8 +16,5 @@ class PlantRepositoryInMemoryInterpreter[F[_]: Applicative] extends PlantReposit
 
   def get(plantId: PlantId): F[Option[Plant]] = cache.get(plantId).pure[F]
 
-  def findByName(name: String): F[Set[Plant]] = cache.values
-    .filter(p => p.name == name)
-    .toSet
-    .pure[F]
+  def findByName(name: String): F[Option[Plant]] = cache.values.find(p => p.name == name).pure[F]
 }
