@@ -15,7 +15,7 @@ class PlantRepoInMemoryInterpreter[F[_]: Applicative] extends PlantRepoAlgebra[F
 
 
   def create(plant: Plant): F[Plant] = {
-    val id = Random.alphanumeric.take(10).mkString("")
+    val id = Random.nextLong()
     val toSave = plant.copy(id = id)
     cache += (PlantId(id)  -> toSave)
     toSave.pure[F]

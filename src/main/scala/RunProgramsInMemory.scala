@@ -3,7 +3,7 @@ import cats.effect.IO
 
 
 // Run with InMemory with IO
-object RunningJobInMemory extends App {
+object RunProgramsInMemory extends App {
 
   import programs._
 

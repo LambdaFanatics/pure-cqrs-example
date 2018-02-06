@@ -3,8 +3,8 @@ package domain
 
 case class Plant(id: PlantId, name: String, country: String)
 
-case class PlantId(value: String) extends AnyVal
+case class PlantId(value: Long) extends AnyVal
 
 object PlantId {
-  implicit def stringToPlantId(value: String): PlantId = PlantId(value)
+  implicit def longToPlantId(value: Long): PlantId = PlantId(value)
 }

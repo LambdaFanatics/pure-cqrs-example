@@ -21,7 +21,7 @@ class PlantRepoDoobieInterpreter[F[_] : Monad](val xa: Transactor[F]) extends Pl
 
 
     def delete(id: PlantId): Update0 = sql"""
-      DELETE FROM plants WHERE id = $id
+      DELETE FROM plants WHERE id = ${id.value}
     """.update
 
     def select(id: PlantId): Query0[Plant] =
@@ -49,7 +49,7 @@ class PlantRepoDoobieInterpreter[F[_] : Monad](val xa: Transactor[F]) extends Pl
   import PlantSQL._
 
   def create(plant: Plant): F[Plant] = insert(plant)
-    .withUniqueGeneratedKeys[String]("id")
+    .withUniqueGeneratedKeys[Long]("id")
     .map(id => plant.copy(id = id))
     .transact(xa)
 

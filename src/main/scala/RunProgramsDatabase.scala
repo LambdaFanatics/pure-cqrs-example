@@ -4,7 +4,7 @@ import infrastructure.repository.doobie.PlantRepoDoobieInterpreter
 
 
 
-object  RunningJobDatabase extends App {
+object  RunProgramsDatabase extends App {
   import programs._
 
   val run = for {
