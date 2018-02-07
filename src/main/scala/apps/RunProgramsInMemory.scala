@@ -1,8 +1,10 @@
-import infrastructure.repository.inmemory.PlantRepoInMemoryInterpreter
+package apps
+
 import cats.effect.IO
+import infrastructure.repository.inmemory.PlantRepoInMemoryInterpreter
 
 
-// Run with InMemory with IO
+// These should be converted to tests
 object RunProgramsInMemory extends App {
 
   import programs._

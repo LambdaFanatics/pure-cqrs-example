@@ -1,3 +1,5 @@
+package apps
+
 import cats.FlatMap
 import cats.implicits._
 import domain._

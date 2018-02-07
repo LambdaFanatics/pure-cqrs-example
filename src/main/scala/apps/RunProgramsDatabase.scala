@@ -1,9 +1,11 @@
+package apps
+
 import cats.effect.IO
 import config.{ApplicationConfig, DatabaseConfig}
 import infrastructure.repository.doobie.PlantRepoDoobieInterpreter
 
 
-
+// TODO these should be converted to tests
 object  RunProgramsDatabase extends App {
   import programs._
 

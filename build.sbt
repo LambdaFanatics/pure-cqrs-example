@@ -4,23 +4,29 @@ version := "0.1"
 
 scalaVersion := "2.12.4"
 
-lazy val CatsVersion = "1.0.1"
-lazy val DoobieVersion = "0.5.0-RC1"
-lazy val FlywayVersion = "5.0.0"
-lazy val LogbackVersion = "1.2.3"
-lazy val PureConfigVersion = "0.9.0"
+lazy val catsVersion = "1.0.1"
+lazy val doobieVersion = "0.5.0-RC1"
+lazy val flywayVersion = "5.0.0"
+lazy val logbackVersion = "1.2.3"
+lazy val pureConfigVersion = "0.9.0"
+lazy val circeVersion = "0.9.1"
 
 libraryDependencies ++= Seq(
-  "org.typelevel" %% "cats-core" % CatsVersion,
-  "org.tpolecat" %% "doobie-core" % DoobieVersion,
-  "org.tpolecat" %% "doobie-h2" % DoobieVersion,
-  "org.tpolecat" %% "doobie-postgres" % DoobieVersion,
-  "org.tpolecat" %% "doobie-hikari" % DoobieVersion,
-  "org.flywaydb" % "flyway-core" % FlywayVersion,
-  "ch.qos.logback" % "logback-classic" % LogbackVersion,
-  "com.github.pureconfig" %% "pureconfig" % PureConfigVersion,
-  "org.tpolecat" %% "doobie-scalatest" % DoobieVersion % Test,
+  "org.typelevel" %% "cats-core" % catsVersion,
+  "org.tpolecat" %% "doobie-core" % doobieVersion,
+  "org.tpolecat" %% "doobie-h2" % doobieVersion,
+  "org.tpolecat" %% "doobie-postgres" % doobieVersion,
+  "org.tpolecat" %% "doobie-hikari" % doobieVersion,
+  "org.flywaydb" % "flyway-core" % flywayVersion,
+  "ch.qos.logback" % "logback-classic" % logbackVersion,
+  "com.github.pureconfig" %% "pureconfig" % pureConfigVersion,
 
+  "io.circe" %% "circe-core" % circeVersion,
+  "io.circe" %% "circe-generic" % circeVersion,
+  "io.circe" %% "circe-parser" % circeVersion,
+
+
+  "org.tpolecat" %% "doobie-scalatest" % doobieVersion % Test
 )
 
 
