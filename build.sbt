@@ -8,6 +8,7 @@ val CatsVersion = "1.0.1"
 val DoobieVersion = "0.5.0-RC1"
 val FlywayVersion = "5.0.0"
 val LogbackVersion = "1.2.3"
+val PureConfigVersion = "0.9.0"
 
 libraryDependencies ++= Seq(
   "org.typelevel" %% "cats-core" % CatsVersion,
@@ -17,6 +18,7 @@ libraryDependencies ++= Seq(
   "org.tpolecat" %% "doobie-hikari" % DoobieVersion,
   "org.flywaydb" % "flyway-core" % FlywayVersion,
   "ch.qos.logback" % "logback-classic" % LogbackVersion,
+  "com.github.pureconfig" %% "pureconfig" % PureConfigVersion,
 
 )
 

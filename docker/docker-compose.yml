@@ -1,0 +1,15 @@
+# see also for postgres https://github.com/mrts/docker-postgresql-multiple-databases
+
+version: '3.3'
+services:
+   postgres-log:
+      image: postgres:9.5
+      container_name: postgres-log
+      environment:
+        - POSTGRES_USER=evlog
+        - POSTGRES_DB=evlog
+        - POSTGRES_PASSWORD=passwd
+      volumes:
+        - "./psql-data:/var/lib/postgresql/data"
+      expose:
+        - "5432"

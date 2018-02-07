@@ -1,5 +1,5 @@
 import cats.effect.IO
-import config.DatabaseConfig
+import config.{ApplicationConfig, DatabaseConfig}
 import infrastructure.repository.doobie.PlantRepoDoobieInterpreter
 
 
@@ -8,7 +8,8 @@ object  RunProgramsDatabase extends App {
   import programs._
 
   val run = for {
-    xa <- DatabaseConfig.dbTransactor[IO]
+    conf <- ApplicationConfig.load[IO]
+    xa <- DatabaseConfig.dbTransactor[IO](conf.db)
     _ <- DatabaseConfig.initializeDb(xa)  // This recreates and initializes the database
     repo = PlantRepoDoobieInterpreter(xa)
     res1 <- fetchPlants(repo)

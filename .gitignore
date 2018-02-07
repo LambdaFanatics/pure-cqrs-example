@@ -6,3 +6,5 @@
 .idea/
 target
 project/target
+
+docker/psql-data
