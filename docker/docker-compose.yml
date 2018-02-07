@@ -1,5 +1,8 @@
-# see also for postgres https://github.com/mrts/docker-postgresql-multiple-databases
+# Using psql connect to this database with:
+#     psql -h 127.0.0.1 -p 5432  -U evlog  evlog
 
+
+# see also for postgres https://github.com/mrts/docker-postgresql-multiple-databases
 version: '3.3'
 services:
    postgres-log:
@@ -13,3 +16,6 @@ services:
         - "./psql-data:/var/lib/postgresql/data"
       expose:
         - "5432"
+      ports:
+        - "5432:5432"
+
