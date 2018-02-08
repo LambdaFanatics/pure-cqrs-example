@@ -16,7 +16,8 @@ object PlaybackHandler extends StreamApp[IO] {
     createStream[IO](args, requestShutdown)
 
 
-  //THIS LIVELOCKS...
+  //FIXME - THIS LIVELOCKS... and honestly I just copied from here https://github.com/gvolpe/fs2-rabbit/blob/master/core/src/main/scala/com/github/gvolpe/fs2rabbit/StreamLoop.scala
+
   def loop[F[_]: Effect, A](program: Stream[F,A], every: FiniteDuration)(implicit ec: ExecutionContext) : Stream[F, A] = {
     val scheduledProgram = Scheduler[F](4)
       .flatMap(_.sleep[F](every))

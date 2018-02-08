@@ -10,7 +10,8 @@ lazy val flywayVersion = "5.0.0"
 lazy val logbackVersion = "1.2.3"
 lazy val pureConfigVersion = "0.9.0"
 lazy val circeVersion = "0.9.1"
-lazy val fs2Version = "0.10.0-RC1"
+lazy val fs2Version = "0.10.0"
+lazy val http4sVersion = "0.18.0"
 
 libraryDependencies ++= Seq(
   //General FP
@@ -32,6 +33,13 @@ libraryDependencies ++= Seq(
 
   // Streaming
   "co.fs2" %% "fs2-core" % fs2Version,
+
+  // Rest / ws api (the servers)
+  "org.http4s"            %% "http4s-blaze-server"  % http4sVersion,
+  "org.http4s"            %% "http4s-circe"         % http4sVersion,
+  "org.http4s"            %% "http4s-dsl"           % http4sVersion,
+
+
   // Testing
   "org.tpolecat" %% "doobie-scalatest" % doobieVersion % Test
 )
