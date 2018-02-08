@@ -10,9 +10,13 @@ lazy val flywayVersion = "5.0.0"
 lazy val logbackVersion = "1.2.3"
 lazy val pureConfigVersion = "0.9.0"
 lazy val circeVersion = "0.9.1"
+lazy val fs2Version = "0.10.0-RC1"
 
 libraryDependencies ++= Seq(
+  //General FP
   "org.typelevel" %% "cats-core" % catsVersion,
+
+  // Database Access
   "org.tpolecat" %% "doobie-core" % doobieVersion,
   "org.tpolecat" %% "doobie-h2" % doobieVersion,
   "org.tpolecat" %% "doobie-postgres" % doobieVersion,
@@ -21,11 +25,14 @@ libraryDependencies ++= Seq(
   "ch.qos.logback" % "logback-classic" % logbackVersion,
   "com.github.pureconfig" %% "pureconfig" % pureConfigVersion,
 
+  // JSON Encoding
   "io.circe" %% "circe-core" % circeVersion,
   "io.circe" %% "circe-generic" % circeVersion,
   "io.circe" %% "circe-parser" % circeVersion,
 
-
+  // Streaming
+  "co.fs2" %% "fs2-core" % fs2Version,
+  // Testing
   "org.tpolecat" %% "doobie-scalatest" % doobieVersion % Test
 )
 

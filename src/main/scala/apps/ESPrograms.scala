@@ -20,7 +20,7 @@ object ESPrograms extends App {
       }
     """
 
-  val arbitaryEvents: IO[Unit] = for {
+  val addArbitraryEvents: IO[Unit] = for {
     conf <- ApplicationConfig.load[IO]
     xa <- DatabaseConfig.dbTransactor[IO](conf.db)
     _ <- DatabaseConfig.initializeDb(xa)
@@ -29,6 +29,6 @@ object ESPrograms extends App {
 
   } yield ()
 
-  arbitaryEvents.unsafeRunSync()
+  addArbitraryEvents.unsafeRunSync()
 
 }
