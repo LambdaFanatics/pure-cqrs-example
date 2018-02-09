@@ -8,7 +8,7 @@ import doobie._
 import doobie.implicits._
 
 
-class PlantRepoDoobieInterpreter[F[_] : Monad](val xa: Transactor[F]) extends PlantRepoAlgebra[F] {
+class PlantStoreDoobieInterpreter[F[_] : Monad](val xa: Transactor[F]) extends PlantStoreAlgebra[F] {
 
   private object PlantSQL {
 
@@ -67,6 +67,6 @@ class PlantRepoDoobieInterpreter[F[_] : Monad](val xa: Transactor[F]) extends Pl
   def list(): F[List[Plant]] = selectAll().list.transact(xa)
 }
 
-object PlantRepoDoobieInterpreter {
-  def apply[F[_] : Monad](xa: Transactor[F]) = new PlantRepoDoobieInterpreter(xa)
+object PlantStoreDoobieInterpreter {
+  def apply[F[_] : Monad](xa: Transactor[F]) = new PlantStoreDoobieInterpreter(xa)
 }

@@ -2,7 +2,7 @@ package apps
 
 import cats.effect.IO
 import config.{ApplicationConfig, DatabaseConfig}
-import infrastructure.repository.doobie.PlantRepoDoobieInterpreter
+import infrastructure.repository.doobie.PlantStoreDoobieInterpreter
 
 
 // TODO these should be converted to tests
@@ -13,7 +13,7 @@ object  RunProgramsDatabase extends App {
     conf <- ApplicationConfig.load[IO]
     xa <- DatabaseConfig.dbTransactor[IO](conf.db)
     _ <- DatabaseConfig.initializeDb(xa)  // This recreates and initializes the database
-    repo = PlantRepoDoobieInterpreter(xa)
+    repo = PlantStoreDoobieInterpreter(xa)
     res1 <- fetchPlants(repo)
     res2 <- createDeleteAndFetch(repo)
     res3 <- createAndFetchPlants(repo)

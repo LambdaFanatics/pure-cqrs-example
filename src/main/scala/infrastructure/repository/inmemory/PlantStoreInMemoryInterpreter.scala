@@ -3,13 +3,13 @@ package inmemory
 
 import cats.Applicative
 import cats.implicits._
-import domain.{Plant, PlantId, PlantRepoAlgebra}
+import domain.{Plant, PlantId, PlantStoreAlgebra}
 
 import scala.collection.concurrent.TrieMap
 import scala.util.Random
 
 
-class PlantRepoInMemoryInterpreter[F[_]: Applicative] extends PlantRepoAlgebra[F] {
+class PlantStoreInMemoryInterpreter[F[_]: Applicative] extends PlantStoreAlgebra[F] {
 
   private val cache = new TrieMap[PlantId, Plant]
 
@@ -31,6 +31,6 @@ class PlantRepoInMemoryInterpreter[F[_]: Applicative] extends PlantRepoAlgebra[F
 }
 
 
-object PlantRepoInMemoryInterpreter {
-  def apply[F[_]: Applicative] = new PlantRepoInMemoryInterpreter[F]
+object PlantStoreInMemoryInterpreter {
+  def apply[F[_]: Applicative] = new PlantStoreInMemoryInterpreter[F]
 }

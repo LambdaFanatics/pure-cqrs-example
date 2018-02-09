@@ -1,6 +1,6 @@
 package domain
 
-trait PlantRepoAlgebra[F[_]] {
+trait PlantStoreAlgebra[F[_]] {
 
   def create(plant: Plant): F[Plant]
 
