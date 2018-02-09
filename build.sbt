@@ -27,9 +27,12 @@ libraryDependencies ++= Seq(
   "com.github.pureconfig" %% "pureconfig" % pureConfigVersion,
 
   // JSON Encoding
-  "io.circe" %% "circe-core" % circeVersion,
-  "io.circe" %% "circe-generic" % circeVersion,
-  "io.circe" %% "circe-parser" % circeVersion,
+  "io.circe"              %% "circe-generic"        % circeVersion,
+  "io.circe"              %% "circe-literal"        % circeVersion,
+  "io.circe"              %% "circe-generic-extras" % circeVersion,
+  "io.circe"              %% "circe-optics"         % circeVersion,
+  "io.circe"              %% "circe-parser"         % circeVersion,
+  "io.circe"              %% "circe-java8"          % circeVersion,
 
   // Streaming
   "co.fs2" %% "fs2-core" % fs2Version,
