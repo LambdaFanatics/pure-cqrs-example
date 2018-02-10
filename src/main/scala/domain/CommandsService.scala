@@ -2,11 +2,10 @@ package domain
 
 import cats.Monad
 import cats.data.EitherT
-import cats.syntax.either._
-
+import cats.implicits._
 import io.circe.generic.auto._
 
-class CommandsService[F[_] : Monad] {
+class CommandsService[F[_] : Monad](eventLog: EventLogAlgebra[F]) {
 
   import CommandsService._
 
@@ -16,23 +15,24 @@ class CommandsService[F[_] : Monad] {
       res <- tryExecute(cmd)
     } yield res
 
+  private def tryExecute(matched: Command): EitherT[F, ValidationError, Command]  = matched match {
+    case cmd@CreatePlant(_,_) =>
+      EitherT.liftF(eventLog.append(Event(None, cmd.toString))).map(_ => cmd)
+
+    case cmd@DeletePlant(_) =>
+      EitherT.liftF(eventLog.append(Event(None, cmd.toString))).map(_ => cmd)
+  }
+
   private def matchCommand(cmd: RawCommand): Either[ValidationError, Command] =
     cmd match {
       case RawCommand("plant", "create", payload) =>
-        payload.as[CreatePlant].leftMap(_ => InvalidCommandError(cmd))
+        payload.as[CreatePlant].leftMap(_ => InvalidCommandPayload(payload.toString))
 
+      case RawCommand("plant", "delete", payload) => {
+        payload.as[CreatePlant].leftMap(_ => InvalidCommandPayload(payload.toString)) }
 
-
-//      case RawCommand("plant", "delete", _) =>
-//        DeletePlant("1").asRight
-
-      case _ => InvalidCommandError(cmd).asLeft
+      case _ => UnknownCommandError(cmd).asLeft
     }
-
-
-  private def tryExecute(matched: Command): EitherT[F, ValidationError, Command]  = matched match {
-    case c@_ => EitherT.rightT[F, ValidationError](c)
-  }
 }
 
 object CommandsService {
@@ -42,6 +42,6 @@ object CommandsService {
   case class CreatePlant(name: String, country: String) extends Command
   case class DeletePlant(id: String) extends Command
 
-  def apply[F[_]: Monad]() = new CommandsService[F]
+  def apply[F[_]: Monad](eventsLog: EventLogAlgebra[F]) = new CommandsService[F](eventsLog)
 
 }
