@@ -3,7 +3,7 @@ package infrastructure.endpoint
 import cats.effect.Effect
 import io.circe.generic.auto._
 import io.circe.syntax._
-import domain.RawCommand
+import domain.{CommandsService, RawCommand}
 import org.http4s.{EntityDecoder, HttpService}
 import org.http4s.dsl.Http4sDsl
 import org.http4s.circe._
@@ -15,19 +15,20 @@ class CommandEndpoints [F[_]: Effect] extends Http4sDsl[F]{
 
   implicit val commandDecoder: EntityDecoder[F, RawCommand] = jsonOf[F, RawCommand]
 
-  def placeCommandEndpoint(): HttpService[F] =
+  def placeCommandEndpoint(service: CommandsService[F]): HttpService[F] =
     HttpService[F] {
       case req @ POST -> Root / "command" =>
         for {
           command <- req.as[RawCommand]
-          resp <- Ok(command.asJson)
+          cmdres <- service.placeCommand(command).value
+          resp <- Ok(cmdres.asJson)
         } yield resp
     }
 
-  def endpoints(): HttpService[F] = placeCommandEndpoint()
+  def endpoints(service: CommandsService[F]): HttpService[F] = placeCommandEndpoint(service)
 }
 
 object CommandEndpoints {
-  def endpoints[F[_]: Effect](): HttpService[F] =
-    new CommandEndpoints[F].endpoints()
+  def endpoints[F[_]: Effect](service: CommandsService[F]): HttpService[F] =
+    new CommandEndpoints[F].endpoints(service)
 }

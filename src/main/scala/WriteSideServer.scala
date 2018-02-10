@@ -1,4 +1,6 @@
 import cats.effect.{Effect, IO}
+import config.ApplicationConfig
+import domain.CommandsService
 import fs2.StreamApp.ExitCode
 import fs2.{Stream, StreamApp}
 import infrastructure.endpoint.CommandEndpoints
@@ -13,10 +15,13 @@ object WriteSideServer extends StreamApp[IO] {
 
   def createStream[F[_] : Effect](args: List[String], shutdown: F[Unit]): Stream[F, ExitCode] =
     for {
+      conf <- Stream.eval(ApplicationConfig.load[F])
+      service = CommandsService[F]
       exitCode <- BlazeBuilder[F]
         .bindHttp(8080, "localhost")
-        .mountService(CommandEndpoints.endpoints())
+        .mountService(CommandEndpoints.endpoints(service))
         .serve
+
     } yield exitCode
 
 }
