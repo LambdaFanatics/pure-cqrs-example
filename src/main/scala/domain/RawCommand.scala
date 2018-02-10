@@ -1,5 +1,7 @@
 package domain
 
-case class RawCommand(category: String, operation: String, payload: String)
+import io.circe.Json
+
+case class RawCommand(category: String, operation: String, payload: Json)
 
 
