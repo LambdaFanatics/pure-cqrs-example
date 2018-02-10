@@ -3,10 +3,9 @@ package domain
 import cats.Monad
 import cats.data.EitherT
 import cats.implicits._
-
 import io.circe.generic.auto._
 
-class CommandsService[F[_] : Monad](eventLog: EventLogAlgebra[F]) {
+class CommandsService[F[_]: Monad](commands: PlantCommandsAlgebra[F]) {
 
   import CommandsService._
 
@@ -17,11 +16,11 @@ class CommandsService[F[_] : Monad](eventLog: EventLogAlgebra[F]) {
     } yield res
 
   private def tryExecute(matched: Command): EitherT[F, ValidationError, Command]  = matched match {
-    case cmd:CreatePlant =>
-      EitherT.liftF(eventLog.append(Event(None, cmd.toString))).map(_ => cmd)
+    case cmd@CreatePlant(name, country) =>
+      EitherT.liftF(commands.create(name, country)).map(_ => cmd)
 
-    case cmd:DeletePlant =>
-      EitherT.liftF(eventLog.append(Event(None, cmd.toString))).map(_ => cmd)
+    case cmd@DeletePlant(id) =>
+      EitherT.liftF(commands.delete(id)).map(_ => cmd)
   }
 
   private def matchCommand(cmd: RawCommand): Either[ValidationError, Command] =
@@ -41,8 +40,8 @@ object CommandsService {
   sealed trait Command extends Product with Serializable
 
   final case class CreatePlant(name: String, country: String) extends Command
-  final case class DeletePlant(id: String) extends Command
+  final case class DeletePlant(id: Long) extends Command
 
-  def apply[F[_]: Monad](eventsLog: EventLogAlgebra[F]) = new CommandsService[F](eventsLog)
+  def apply[F[_]: Monad](commands: PlantCommandsAlgebra[F]) = new CommandsService[F](commands)
 
 }

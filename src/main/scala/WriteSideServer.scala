@@ -1,6 +1,6 @@
 import cats.effect.{Effect, IO}
 import config.{ApplicationConfig, DatabaseConfig}
-import domain.CommandsService
+import domain.{CommandsService, PlantCommandsInterpreter}
 import fs2.StreamApp.ExitCode
 import fs2.{Stream, StreamApp}
 import infrastructure.endpoint.CommandEndpoints
@@ -19,7 +19,8 @@ object WriteSideServer extends StreamApp[IO] {
       conf <- Stream.eval(ApplicationConfig.load[F])
       xa <- Stream.eval(DatabaseConfig.dbTransactor[F](conf.db))
       eventLog = EventLogDoobieInterpreter(xa)
-      service = CommandsService[F](eventLog)
+      commands = PlantCommandsInterpreter[F](eventLog)
+      service = CommandsService[F](commands)
       exitCode <- BlazeBuilder[F]
         .bindHttp(8080, "localhost")
         .mountService(CommandEndpoints.endpoints(service))
