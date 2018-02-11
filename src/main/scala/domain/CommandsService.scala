@@ -1,5 +1,7 @@
 package domain
 
+import java.util.UUID
+
 import cats.Monad
 import cats.data.EitherT
 import cats.implicits._
@@ -40,7 +42,7 @@ object CommandsService {
   sealed trait Command extends Product with Serializable
 
   final case class CreatePlant(name: String, country: String) extends Command
-  final case class DeletePlant(id: Long) extends Command
+  final case class DeletePlant(id: UUID) extends Command
 
   def apply[F[_]: Monad](commands: PlantCommandsAlgebra[F]) = new CommandsService[F](commands)
 

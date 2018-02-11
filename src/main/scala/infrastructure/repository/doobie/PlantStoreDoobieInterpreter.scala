@@ -6,6 +6,7 @@ import cats.implicits._
 import domain._
 import doobie._
 import doobie.implicits._
+import doobie.postgres.implicits._
 
 
 class PlantStoreDoobieInterpreter[F[_] : Monad](val xa: Transactor[F]) extends PlantStoreAlgebra[F] {
@@ -14,21 +15,16 @@ class PlantStoreDoobieInterpreter[F[_] : Monad](val xa: Transactor[F]) extends P
 
 
     def insert(plant: Plant): Update0 =
-      sql"""
-        INSERT INTO plants (name, country)
-        VALUES (${plant.name}, ${plant.country})
-      """.update
+      sql"""INSERT INTO plants (id, name, country)
+            VALUES (${plant.id.value}, ${plant.name}, ${plant.country})"""
+        .update
 
 
-    def delete(id: PlantId): Update0 = sql"""
-      DELETE FROM plants WHERE id = ${id.value}
-    """.update
+    def delete(id: PlantId): Update0 = sql"""DELETE FROM plants WHERE id =${id.value}"""
+      .update
 
     def select(id: PlantId): Query0[Plant] =
-      sql"""
-          SELECT id, name, country
-          FROM plants
-          WHERE id = ${id.value}"""
+      sql"""SELECT id, name, country FROM plants WHERE id = ${id.value}"""
         .query
 
     def selectByName(name: String): Query0[Plant] =
@@ -48,15 +44,10 @@ class PlantStoreDoobieInterpreter[F[_] : Monad](val xa: Transactor[F]) extends P
 
   import PlantSQL._
 
-  def create(plant: Plant): F[Plant] = insert(plant)
-    .withUniqueGeneratedKeys[Long]("id")
-    .map(id => plant.copy(id = id))
-    .transact(xa)
-
-
+  def create(plant: Plant): F[Plant] = insert(plant).run.transact(xa).as(plant)
 
   def delete(id: PlantId): F[Option[Plant]] = OptionT(get(id))
-    .semiflatMap( plant =>
+    .semiflatMap(plant =>
       PlantSQL.delete(id).run.transact(xa).as(plant)
     ).value
 

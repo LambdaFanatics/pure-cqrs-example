@@ -4,10 +4,12 @@ import cats.FlatMap
 import cats.implicits._
 import domain._
 
+import java.util.UUID
+
 object programs {
   def fetchPlants[F[_]: FlatMap](repo: PlantStoreAlgebra[F]) =
     for {
-      p1 <- repo.get(1L)
+      p1 <- repo.get(UUID.randomUUID())
       p2 <- repo.findByName("plant 1")
       all <- repo.list()
     } yield (p1, p2, all)
@@ -15,16 +17,16 @@ object programs {
 
   def createAndFetchPlants[F[_]: FlatMap](repo: PlantStoreAlgebra[F]) =
     for {
-      _ <- repo.create(Plant(0L, "NEMESIS", "GREECE"))
-      _ <- repo.create(Plant(0L, "TISIS", "GREECE"))
-      _ <- repo.create(Plant(0L, "TALOS", "GREECE"))
+      _ <- repo.create(Plant(UUID.randomUUID(), "NEMESIS", "GREECE"))
+      _ <- repo.create(Plant(UUID.randomUUID(), "TISIS", "GREECE"))
+      _ <- repo.create(Plant(UUID.randomUUID(), "TALOS", "GREECE"))
       all <- repo.list()
     } yield all
 
 
   def createDeleteAndFetch[F[_]: FlatMap](repo: PlantStoreAlgebra[F]) =
     for {
-      p <- repo.create(Plant(0L, "NEMESIS", "GREECE"))
+      p <- repo.create(Plant(UUID.randomUUID(), "NEMESIS", "GREECE"))
       _ <- repo.delete(p.id)
       all <- repo.list()
     } yield all

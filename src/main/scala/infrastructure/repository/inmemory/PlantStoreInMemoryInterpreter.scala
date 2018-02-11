@@ -1,12 +1,13 @@
 package infrastructure.repository
 package inmemory
 
+import java.util.UUID
+
 import cats.Applicative
 import cats.implicits._
 import domain.{Plant, PlantId, PlantStoreAlgebra}
 
 import scala.collection.concurrent.TrieMap
-import scala.util.Random
 
 
 class PlantStoreInMemoryInterpreter[F[_]: Applicative] extends PlantStoreAlgebra[F] {
@@ -15,7 +16,7 @@ class PlantStoreInMemoryInterpreter[F[_]: Applicative] extends PlantStoreAlgebra
 
 
   def create(plant: Plant): F[Plant] = {
-    val id = Random.nextLong()
+    val id = UUID.randomUUID()
     val toSave = plant.copy(id = id)
     cache += (PlantId(id)  -> toSave)
     toSave.pure[F]
@@ -32,5 +33,5 @@ class PlantStoreInMemoryInterpreter[F[_]: Applicative] extends PlantStoreAlgebra
 
 
 object PlantStoreInMemoryInterpreter {
-  def apply[F[_]: Applicative] = new PlantStoreInMemoryInterpreter[F]
+  def apply[F[_]: Applicative]() = new PlantStoreInMemoryInterpreter[F]
 }
