@@ -18,11 +18,17 @@ class CommandEndpoints [F[_]: Effect] extends Http4sDsl[F]{
   def placeCommandEndpoint(service: CommandsService[F]): HttpService[F] =
     HttpService[F] {
       case req @ POST -> Root / "command" =>
-        for {
+
+        val action =  for {
           command <- req.as[RawCommand]
           res <- service.placeCommand(command)
-          resp <- Ok(res.asJson)
-        } yield resp
+        } yield res
+
+        action.flatMap {
+          case Right(cmd) => Ok(cmd.asJson)
+          case Left(error) => Conflict(error.asJson)
+        }
+
     }
 
   def endpoints(service: CommandsService[F]): HttpService[F] = placeCommandEndpoint(service)

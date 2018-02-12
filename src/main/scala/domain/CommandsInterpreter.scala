@@ -10,6 +10,7 @@ class CommandsInterpreter[F[_] : Effect](elog: EventLogAlgebra[F], v: Validation
     val res: EitherT[F, ValidationError, RawEvent] = for {
       _   <- EitherT { v.checkPlantDoesNotExist(name) }
       uid <- liftF(elog.generateUID())
+      _   <- liftF(v.put((uid, name)))
       ev  <- liftF(elog.append(RawEvent(None, s"PLANT_CREATED $uid $name $country")))
     } yield ev
     res.value
@@ -18,6 +19,7 @@ class CommandsInterpreter[F[_] : Effect](elog: EventLogAlgebra[F], v: Validation
   def delete(id: PlantId): F[Either[ValidationError, RawEvent]] = {
     val res: EitherT[F, ValidationError, RawEvent] = for {
       _   <- EitherT(v.checkPlantExists(id))
+      _   <- liftF(v.delete(id))
       ev  <- liftF(elog.append(RawEvent(None, s"PLANT_DELETED $id.value")))
     } yield ev
     res.value
