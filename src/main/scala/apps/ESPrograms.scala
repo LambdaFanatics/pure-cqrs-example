@@ -3,7 +3,7 @@ package apps
 
 import cats.effect.IO
 import config.{ApplicationConfig, DatabaseConfig}
-import domain.Event
+import domain.RawEvent
 import infrastructure.repository.doobie.EventLogDoobieInterpreter
 
 
@@ -25,7 +25,7 @@ object ESPrograms extends App {
     xa <- DatabaseConfig.dbTransactor[IO](conf.db)
     _ <- DatabaseConfig.initializeDb(xa)
     eventLog = EventLogDoobieInterpreter(xa)
-    _ <- eventLog.append(Event(None, dummyPayload))
+    _ <- eventLog.append(RawEvent(None, dummyPayload))
 
   } yield ()
 

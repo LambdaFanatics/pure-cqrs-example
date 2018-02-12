@@ -4,25 +4,27 @@ import java.util.UUID
 
 import cats.Monad
 import cats.data.EitherT
-import cats.implicits._
 import io.circe.generic.auto._
+import cats.implicits._
 
-class CommandsService[F[_]: Monad](commands: PlantCommandsAlgebra[F]) {
+class CommandsService[F[_]: Monad](commands: CommandsAlgebra[F]) {
 
   import CommandsService._
 
-  def placeCommand(cmd: RawCommand): EitherT[F, ValidationError, Command] =
-    for {
+  def placeCommand(cmd: RawCommand): F[Either[ValidationError, Command]] = {
+    val res = for {
       cmd <- EitherT.fromEither[F](matchCommand(cmd))
       res <- tryExecute(cmd)
     } yield res
+    res.value
+  }
 
   private def tryExecute(matched: Command): EitherT[F, ValidationError, Command]  = matched match {
     case cmd@CreatePlant(name, country) =>
-      EitherT.liftF(commands.create(name, country)).map(_ => cmd)
+      EitherT(commands.create(name, country)).map(_ => cmd)
 
     case cmd@DeletePlant(id) =>
-      EitherT.liftF(commands.delete(id)).map(_ => cmd)
+      EitherT(commands.delete(id)).map(_ => cmd)
   }
 
   private def matchCommand(cmd: RawCommand): Either[ValidationError, Command] =
@@ -33,7 +35,7 @@ class CommandsService[F[_]: Monad](commands: PlantCommandsAlgebra[F]) {
       case RawCommand("plant", "delete", payload) => {
         payload.as[DeletePlant].leftMap(_ => InvalidCommandPayload(payload.toString)) }
 
-      case _ => UnknownCommandError(cmd).asLeft
+      case _ => UnknownCommand(cmd).asLeft
     }
 }
 
@@ -44,6 +46,6 @@ object CommandsService {
   final case class CreatePlant(name: String, country: String) extends Command
   final case class DeletePlant(id: UUID) extends Command
 
-  def apply[F[_]: Monad](commands: PlantCommandsAlgebra[F]) = new CommandsService[F](commands)
+  def apply[F[_]: Monad](commands: CommandsAlgebra[F]) = new CommandsService[F](commands)
 
 }

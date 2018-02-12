@@ -20,7 +20,7 @@ class CommandEndpoints [F[_]: Effect] extends Http4sDsl[F]{
       case req @ POST -> Root / "command" =>
         for {
           command <- req.as[RawCommand]
-          res <- service.placeCommand(command).value
+          res <- service.placeCommand(command)
           resp <- Ok(res.asJson)
         } yield resp
     }

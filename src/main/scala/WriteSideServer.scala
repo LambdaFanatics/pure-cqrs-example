@@ -1,10 +1,11 @@
 import cats.effect.{Effect, IO}
 import config.{ApplicationConfig, DatabaseConfig}
-import domain.{CommandsService, PlantCommandsInterpreter}
+import domain.{CommandsInterpreter, CommandsService}
 import fs2.StreamApp.ExitCode
 import fs2.{Stream, StreamApp}
 import infrastructure.endpoint.CommandEndpoints
 import infrastructure.repository.doobie.EventLogDoobieInterpreter
+import infrastructure.repository.inmemory.ValidationInMemoryInterpreter
 import org.http4s.server.blaze.BlazeBuilder
 
 object WriteSideServer extends StreamApp[IO] {
@@ -19,7 +20,8 @@ object WriteSideServer extends StreamApp[IO] {
       conf <- Stream.eval(ApplicationConfig.load[F])
       xa <- Stream.eval(DatabaseConfig.dbTransactor[F](conf.db))
       eventLog = EventLogDoobieInterpreter(xa)
-      commands = PlantCommandsInterpreter[F](eventLog)
+      validation = ValidationInMemoryInterpreter[F]
+      commands = CommandsInterpreter[F](eventLog, validation)
       service = CommandsService[F](commands)
       exitCode <- BlazeBuilder[F]
         .bindHttp(8080, "localhost")

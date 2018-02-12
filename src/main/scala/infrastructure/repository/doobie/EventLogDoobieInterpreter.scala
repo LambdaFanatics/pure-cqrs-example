@@ -1,7 +1,10 @@
 package infrastructure.repository.doobie
 
+import java.util.UUID
+
 import cats.Monad
-import domain.{Event, EventLogAlgebra}
+import cats.effect.Async
+import domain.{RawEvent, EventLogAlgebra}
 import doobie.free.connection.ConnectionIO
 import doobie.implicits._
 import doobie.util.transactor.Transactor
@@ -10,7 +13,7 @@ import fs2.Stream
 class EventLogDoobieInterpreter[F[_]: Monad](val xa: Transactor[F]) extends EventLogAlgebra[F] {
   private object queries {
 
-    def append(event: Event): ConnectionIO[Event] = {
+    def append(event: RawEvent): ConnectionIO[RawEvent] = {
       sql"""INSERT INTO events (payload) VALUES (${event.payload})"""
         .update
         .withUniqueGeneratedKeys[Long]("id")
@@ -18,14 +21,16 @@ class EventLogDoobieInterpreter[F[_]: Monad](val xa: Transactor[F]) extends Even
     }
 
 
-    val streamAll: Stream[ConnectionIO, Event] =
-      sql"""select id, payload from events""".query[Event].process
+    val streamAll: Stream[ConnectionIO, RawEvent] =
+      sql"""select id, payload from events""".query[RawEvent].process
 
   }
 
-  def append(e: Event): F[Event] = queries.append(e).transact(xa)
+  def append(e: RawEvent): F[RawEvent] = queries.append(e).transact(xa)
 
-  def consume(): fs2.Stream[F, Event] = queries.streamAll.transact(xa)
+  def consume(): fs2.Stream[F, RawEvent] = queries.streamAll.transact(xa)
+
+  def generateUID()(implicit async: Async[F]): F[UUID] = async.delay(UUID.randomUUID())
 }
 
 object EventLogDoobieInterpreter {
