@@ -5,12 +5,12 @@ version := "0.1"
 scalaVersion := "2.12.4"
 
 lazy val catsVersion = "1.0.1"
-lazy val doobieVersion = "0.5.0-RC1"
+lazy val doobieVersion = "0.5.0"
 lazy val flywayVersion = "5.0.0"
 lazy val logbackVersion = "1.2.3"
 lazy val pureConfigVersion = "0.9.0"
 lazy val circeVersion = "0.9.1"
-lazy val fs2Version = "0.10.0"
+lazy val fs2Version = "0.10.1"
 lazy val http4sVersion = "0.18.0"
 
 libraryDependencies ++= Seq(

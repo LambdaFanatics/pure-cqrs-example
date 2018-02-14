@@ -22,7 +22,7 @@ class EventLogDoobieInterpreter[F[_]: Monad](val xa: Transactor[F]) extends Even
 
 
     val streamAll: Stream[ConnectionIO, RawEvent] =
-      sql"""select id, payload from events""".query[RawEvent].process
+      sql"""select id, payload from events""".query[RawEvent].stream
 
   }
 

@@ -55,7 +55,7 @@ class PlantStoreDoobieInterpreter[F[_] : Monad](val xa: Transactor[F]) extends P
 
   def findByName(name: String): F[Option[Plant]] = selectByName(name).option.transact(xa)
 
-  def list(): F[List[Plant]] = selectAll().list.transact(xa)
+  def list(): F[List[Plant]] = selectAll().to[List].transact(xa)
 }
 
 object PlantStoreDoobieInterpreter {
