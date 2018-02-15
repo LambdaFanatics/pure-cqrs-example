@@ -1,7 +1,6 @@
 package apps
 
 import cats.effect.IO
-import config.{ApplicationConfig, DatabaseConfig}
 import infrastructure.repository.doobie.PlantStoreDoobieInterpreter
 
 

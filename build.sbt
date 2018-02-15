@@ -63,11 +63,11 @@ lazy val commonSettings: Seq[SettingsDefinition] = Seq(
     ++ Libraries.http4sBundle
     ++ Libraries.circeBundle
     ++ Seq(
-      Libraries.catsCore,
-      Libraries.logback,
-      Libraries.pureConfig,
-      Libraries.fs2Core,
-      Libraries.flyway
+    Libraries.catsCore,
+    Libraries.logback,
+    Libraries.pureConfig,
+    Libraries.fs2Core,
+    Libraries.flyway
   )
 )
 
@@ -76,6 +76,12 @@ lazy val root = project.in(file("."))
 
 lazy val writeside = project.in(file("writeside"))
   .settings(commonSettings: _*)
+  .dependsOn(shared)
+
 
 lazy val readside = project.in(file("readside"))
+  .settings(commonSettings: _*)
+  .dependsOn(shared)
+
+lazy val shared = project.in(file("shared"))
   .settings(commonSettings: _*)

@@ -2,7 +2,6 @@ package apps
 
 
 import cats.effect.IO
-import config.{ApplicationConfig, DatabaseConfig}
 import domain.RawEvent
 import infrastructure.repository.doobie.EventLogDoobieInterpreter
 

@@ -1,7 +1,6 @@
 package apps
 
 import cats.effect.{Effect, IO}
-import config.{ApplicationConfig, DatabaseConfig}
 import fs2.StreamApp.ExitCode
 import fs2.{Pipe, Scheduler, Stream, StreamApp}
 import infrastructure.repository.doobie.EventLogDoobieInterpreter

@@ -3,12 +3,12 @@ package config
 import cats.effect.Effect
 import cats.implicits._
 import pureconfig.error.ConfigReaderException
+import pureconfig._
 
 case class ApplicationConfig(db: DatabaseConfig)
 
 object ApplicationConfig {
 
-  import pureconfig._
 
   /**
     * Loads the pet store config using PureConfig.  If configuration is invalid we will
