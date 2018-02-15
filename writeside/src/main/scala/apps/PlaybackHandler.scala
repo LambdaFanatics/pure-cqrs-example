@@ -16,8 +16,8 @@ object PlaybackHandler extends StreamApp[IO] {
     createStream[IO](args, requestShutdown).drain.as(ExitCode.Success) // TODO: Search what happens with drain? why without it we don't consume the stream I miss something here...
 
 
-  def loop[F[_]: Effect, A](program: Stream[F,A], every: FiniteDuration)(implicit ec: ExecutionContext) : Stream[F, A] = {
-       Scheduler[F](2).flatMap(_.sleep[F](every)).flatMap(_ => program) ++ loop(program, every)
+  def loopWithDelay[F[_]: Effect, A](program: Stream[F,A], every: FiniteDuration)(implicit ec: ExecutionContext) : Stream[F, A] = {
+       Scheduler[F](2).flatMap(f => (program ++ f.sleep_[F](every)).repeat )
   }
 
   def log[F[_]: Effect,A](prefix: String): Pipe[F, A, A] = _.evalMap(a => Effect[F].delay { println(s"[$prefix - ${Thread.currentThread.getName}] $a "); a})
@@ -29,7 +29,7 @@ object PlaybackHandler extends StreamApp[IO] {
       eventLog = EventLogDoobieInterpreter[F](xa)
       //TODO here map the events to an algebra (store to db, push to a WS [how?] etc...)
       readLogProgram =  eventLog.consume().through(log("consumer"))
-      _ <- loop(readLogProgram, 1.second)
+      _ <- loopWithDelay(readLogProgram, 10.second)
     } yield ()
   }
 }
