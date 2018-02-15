@@ -8,7 +8,7 @@ import infrastructure.repository.doobie.EventLogDoobieInterpreter
 import infrastructure.repository.inmemory.ValidationInMemoryInterpreter
 import org.http4s.server.blaze.BlazeBuilder
 
-object WriteSideServer extends StreamApp[IO] {
+object Server extends StreamApp[IO] {
 
   import scala.concurrent.ExecutionContext.Implicits.global
 
@@ -27,7 +27,5 @@ object WriteSideServer extends StreamApp[IO] {
         .bindHttp(8080, "localhost")
         .mountService(CommandEndpoints.endpoints(service))
         .serve
-
     } yield exitCode
-
 }

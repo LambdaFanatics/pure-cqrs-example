@@ -1,17 +1,11 @@
-name := "pure-cqrs-example"
+import Dependencies._
 
-lazy val catsVersion = "1.0.1"
-lazy val doobieVersion = "0.5.0"
-lazy val flywayVersion = "5.0.0"
-lazy val logbackVersion = "1.2.3"
-lazy val pureConfigVersion = "0.9.0"
-lazy val circeVersion = "0.9.1"
-lazy val fs2Version = "0.10.1"
-lazy val http4sVersion = "0.18.0"
+name := "pure-cqrs-example"
 
 lazy val commonSettings: Seq[SettingsDefinition] = Seq(
   inThisBuild(List(
     version := "0.1",
+
     scalaVersion := "2.12.4",
 
     // Scalac configuration as seen in https://tpolecat.github.io/2017/04/25/scalac-flags.html
@@ -65,38 +59,15 @@ lazy val commonSettings: Seq[SettingsDefinition] = Seq(
       // format: on
     ))
   ),
-  libraryDependencies ++= Seq(
-    //General FP
-    "org.typelevel" %% "cats-core" % catsVersion,
-
-    // Database Access
-    "org.tpolecat" %% "doobie-core" % doobieVersion,
-    "org.tpolecat" %% "doobie-h2" % doobieVersion,
-    "org.tpolecat" %% "doobie-postgres" % doobieVersion,
-    "org.tpolecat" %% "doobie-hikari" % doobieVersion,
-    "org.flywaydb" % "flyway-core" % flywayVersion,
-    "ch.qos.logback" % "logback-classic" % logbackVersion,
-    "com.github.pureconfig" %% "pureconfig" % pureConfigVersion,
-
-    // JSON Encoding
-    "io.circe" %% "circe-generic" % circeVersion,
-    "io.circe" %% "circe-literal" % circeVersion,
-    "io.circe" %% "circe-generic-extras" % circeVersion,
-    "io.circe" %% "circe-optics" % circeVersion,
-    "io.circe" %% "circe-parser" % circeVersion,
-    "io.circe" %% "circe-java8" % circeVersion,
-
-    // Streaming
-    "co.fs2" %% "fs2-core" % fs2Version,
-
-    // Rest / ws api (the servers)
-    "org.http4s" %% "http4s-blaze-server" % http4sVersion,
-    "org.http4s" %% "http4s-circe" % http4sVersion,
-    "org.http4s" %% "http4s-dsl" % http4sVersion,
-
-
-    // Testing
-    "org.tpolecat" %% "doobie-scalatest" % doobieVersion % Test
+  libraryDependencies ++= Libraries.doobieBundle
+    ++ Libraries.http4sBundle
+    ++ Libraries.circeBundle
+    ++ Seq(
+      Libraries.catsCore,
+      Libraries.logback,
+      Libraries.pureConfig,
+      Libraries.fs2Core,
+      Libraries.flyway
   )
 )
 
@@ -104,4 +75,7 @@ lazy val root = project.in(file("."))
   .aggregate(writeside)
 
 lazy val writeside = project.in(file("writeside"))
-    .settings(commonSettings: _*)
+  .settings(commonSettings: _*)
+
+lazy val readside = project.in(file("readside"))
+  .settings(commonSettings: _*)
