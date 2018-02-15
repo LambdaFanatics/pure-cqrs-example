@@ -1,4 +1,5 @@
 import cats.effect.{Effect, IO}
+import config.{ApplicationConfig, DatabaseConfig}
 import domain.{CommandsInterpreter, CommandsService}
 import fs2.StreamApp.ExitCode
 import fs2.{Stream, StreamApp}
