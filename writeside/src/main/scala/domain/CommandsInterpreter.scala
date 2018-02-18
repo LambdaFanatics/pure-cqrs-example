@@ -1,17 +1,26 @@
 package domain
 
+import cats.Functor
 import cats.data.EitherT
-import cats.data.EitherT.liftF
 import cats.effect.Effect
+import io.circe.generic.auto._
+import io.circe.syntax._
 
 class CommandsInterpreter[F[_] : Effect](elog: EventLogAlgebra[F], v: ValidationAlgebra[F]) extends CommandsAlgebra[F] {
 
+
+  // TODO decide if we will make these effect (F[_]) extensions...
+  // Helper experiment for EitherT help operators
+  implicit class EitherTLiftOp[G[_]: Functor, B](f: G[B]) {
+    def liftF[A]: EitherT[G, A, B] = EitherT.liftF[G,A,B](f)
+  }
+
   def create(name: String, country: String): F[Either[ValidationError, RawEvent]] = {
     val res: EitherT[F, ValidationError, RawEvent] = for {
-      _   <- EitherT { v.checkPlantDoesNotExist(name) }
-      uid <- liftF(elog.generateUID())
-      _   <- liftF(v.put((uid, name)))
-      ev  <- liftF(elog.append(RawEvent(None, s"PLANT_CREATED $uid $name $country")))
+      _   <- EitherT(v.checkPlantDoesNotExist(name))
+      uid <- elog.generateUID().liftF
+      _   <- v.put((uid, name)).liftF
+      ev  <- elog.append(RawEvent(None, Event.toTypedEvent(PlantCreated(uid, name, country)).asJson)).liftF
     } yield ev
     res.value
   }
@@ -19,8 +28,8 @@ class CommandsInterpreter[F[_] : Effect](elog: EventLogAlgebra[F], v: Validation
   def delete(id: PlantId): F[Either[ValidationError, RawEvent]] = {
     val res: EitherT[F, ValidationError, RawEvent] = for {
       _   <- EitherT(v.checkPlantExists(id))
-      _   <- liftF(v.delete(id))
-      ev  <- liftF(elog.append(RawEvent(None, s"PLANT_DELETED $id.value")))
+      _   <- v.delete(id).liftF
+      ev  <- elog.append(RawEvent(None, Event.toTypedEvent(PlantDeleted(id.value)).asJson)).liftF
     } yield ev
     res.value
   }

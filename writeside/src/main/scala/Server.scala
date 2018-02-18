@@ -19,6 +19,7 @@ object Server extends StreamApp[IO] {
     for {
       conf <- Stream.eval(ApplicationConfig.load[F])
       xa <- Stream.eval(DatabaseConfig.dbTransactor[F](conf.db))
+      _ <- Stream.eval(DatabaseConfig.initializeDb(xa))
       eventLog = EventLogDoobieInterpreter(xa)
       validation = ValidationInMemoryInterpreter[F]
       commands = CommandsInterpreter[F](eventLog, validation)

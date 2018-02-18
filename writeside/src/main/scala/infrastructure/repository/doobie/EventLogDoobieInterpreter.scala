@@ -4,13 +4,32 @@ import java.util.UUID
 
 import cats.Monad
 import cats.effect.Async
-import domain.{RawEvent, EventLogAlgebra}
+import domain.{EventLogAlgebra, RawEvent}
 import doobie.free.connection.ConnectionIO
 import doobie.implicits._
 import doobie.util.transactor.Transactor
 import fs2.Stream
 
+import doobie._
+import io.circe.Json
+import cats.implicits._
+import io.circe.parser._
+import org.postgresql.util.PGobject
+
+
+
 class EventLogDoobieInterpreter[F[_]: Monad](val xa: Transactor[F]) extends EventLogAlgebra[F] {
+
+  implicit val JsonMeta: Meta[Json] =
+    Meta.other[PGobject]("json").xmap[Json](
+      a => parse(a.getValue).leftMap[Json](e => throw e).merge,
+      a => {
+        val o = new PGobject
+        o.setType("json")
+        o.setValue(a.noSpaces)
+        o
+      }
+    )
   private object queries {
 
     def append(event: RawEvent): ConnectionIO[RawEvent] = {
