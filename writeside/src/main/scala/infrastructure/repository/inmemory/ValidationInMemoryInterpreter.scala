@@ -6,6 +6,8 @@ import domain._
 import scala.collection.concurrent.TrieMap
 import cats.implicits._
 
+import validations._
+
 
 class ValidationInMemoryInterpreter[F[_]: Applicative] extends ValidationAlgebra[F] {
 

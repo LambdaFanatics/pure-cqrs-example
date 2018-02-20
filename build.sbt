@@ -72,7 +72,7 @@ lazy val commonSettings: Seq[SettingsDefinition] = Seq(
 )
 
 lazy val root = project.in(file("."))
-  .aggregate(writeside, readside, shared)
+  .aggregate(writeside, readside, shared, examples)
 
 lazy val writeside = project.in(file("writeside"))
   .settings(commonSettings: _*)
@@ -85,3 +85,7 @@ lazy val readside = project.in(file("readside"))
 
 lazy val shared = project.in(file("shared"))
   .settings(commonSettings: _*)
+
+lazy val examples = project.in(file("examples"))
+  .settings(commonSettings: _*)
+  .dependsOn(writeside, readside, shared)

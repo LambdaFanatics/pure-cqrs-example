@@ -1,15 +1,15 @@
 package domain
 
-import java.util.UUID
 
 import cats.Monad
 import cats.data.EitherT
-import io.circe.generic.auto._
 import cats.implicits._
+import domain.commands._
+import domain.commands.codec._
+import domain.validations.{InvalidCommandPayload, UnknownCommand, ValidationError}
+
 
 class CommandsService[F[_]: Monad](commands: CommandsAlgebra[F]) {
-
-  import CommandsService._
 
   def placeCommand(cmd: RawCommand): F[Either[ValidationError, Command]] = {
     val res = for {
@@ -40,12 +40,6 @@ class CommandsService[F[_]: Monad](commands: CommandsAlgebra[F]) {
 }
 
 object CommandsService {
-
-  sealed trait Command extends Product with Serializable
-
-  final case class CreatePlant(name: String, country: String) extends Command
-  final case class DeletePlant(id: UUID) extends Command
-
   def apply[F[_]: Monad](commands: CommandsAlgebra[F]) = new CommandsService[F](commands)
-
 }
+

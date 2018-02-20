@@ -1,6 +1,6 @@
 package domain
 
-
+import validations._
 
 trait ValidationAlgebra[F[_]] {
 

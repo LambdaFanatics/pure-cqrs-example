@@ -3,7 +3,7 @@ package apps
 
 import cats.effect.IO
 import config.{ApplicationConfig, DatabaseConfig}
-import domain.RawEvent
+import domain.events.RawEvent
 import infrastructure.repository.doobie.EventLogDoobieInterpreter
 import io.circe.Json
 import io.circe.parser._

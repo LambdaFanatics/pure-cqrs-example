@@ -4,7 +4,7 @@ import java.util.UUID
 
 import cats.Monad
 import cats.effect.Async
-import domain.{EventLogAlgebra, RawEvent}
+import domain.EventLogAlgebra
 import doobie.free.connection.ConnectionIO
 import doobie.implicits._
 import doobie.util.transactor.Transactor
@@ -17,6 +17,7 @@ import io.circe.parser._
 import org.postgresql.util.PGobject
 
 
+import domain.events.RawEvent
 
 class EventLogDoobieInterpreter[F[_]: Monad](val xa: Transactor[F]) extends EventLogAlgebra[F] {
 

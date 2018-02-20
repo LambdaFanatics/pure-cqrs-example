@@ -3,6 +3,7 @@ package domain
 import java.util.UUID
 
 import cats.effect.Async
+import domain.events.RawEvent
 import fs2.Stream
 
 trait EventLogAlgebra [F[_]] {
