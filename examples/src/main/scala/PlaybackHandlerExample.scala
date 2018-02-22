@@ -9,11 +9,12 @@ import infrastructure.repository.doobie.EventLogDoobieInterpreter
 import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
 
-object PlaybackHandler extends StreamApp[IO] {
+object PlaybackHandlerExample extends StreamApp[IO] {
   implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
 
   def stream(args: List[String], requestShutdown: IO[Unit]): Stream[IO, ExitCode] =
-    createStream[IO](args, requestShutdown).drain.as(ExitCode.Success) // TODO: Search what happens with drain? why without it we don't consume the stream I miss something here...
+    // TODO: Search what happens with drain? why without it we don't consume the stream I miss something here...
+    createStream[IO](args, requestShutdown).drain.as(ExitCode.Success)
 
 
   def loopWithDelay[F[_]: Effect, A](program: Stream[F,A], every: FiniteDuration)(implicit ec: ExecutionContext) : Stream[F, A] = {
@@ -27,7 +28,6 @@ object PlaybackHandler extends StreamApp[IO] {
       conf <- Stream.eval(ApplicationConfig.load[F])
       xa <- Stream.eval(DatabaseConfig.dbTransactor[F](conf.db))
       eventLog = EventLogDoobieInterpreter[F](xa)
-      //TODO here map the events to an algebra (store to db, push to a WS [how?] etc...)
       readLogProgram =  eventLog.consume().through(log("consumer"))
       _ <- loopWithDelay(readLogProgram, 10.second)
     } yield ()

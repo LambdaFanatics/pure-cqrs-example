@@ -2,12 +2,11 @@ package domain
 
 import java.util.UUID
 
-import io.circe.Json
 import io.circe.generic.extras.AutoDerivation
 
 object events  {
 
-  case class RawEvent(id: Option[Long], payload: Json)
+
 
   sealed trait Event extends Product with Serializable
   case class PlantCreated(id: UUID, name: String, country: String) extends Event
