@@ -1,7 +1,6 @@
-package apps
 
 import cats.effect.IO
-import infrastructure.repository.inmemory.PlantStoreInMemoryInterpreter
+import interpreter.memory.PlantStoreInMemoryInterpreter
 
 
 // These should be converted to tests

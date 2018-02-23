@@ -4,8 +4,8 @@ import domain.{CommandsInterpreter, CommandsService}
 import fs2.StreamApp.ExitCode
 import fs2.{Stream, StreamApp}
 import infrastructure.endpoint.CommandEndpoints
-import infrastructure.repository.doobie.EventLogDoobieInterpreter
 import infrastructure.repository.inmemory.ValidationInMemoryInterpreter
+import interpreter.doobie.EventLogDoobieInterpreter
 import org.http4s.server.blaze.BlazeBuilder
 
 object Server extends StreamApp[IO] {
@@ -17,7 +17,7 @@ object Server extends StreamApp[IO] {
 
   def createStream[F[_] : Effect](args: List[String], shutdown: F[Unit]): Stream[F, ExitCode] =
     for {
-      conf <- Stream.eval(ApplicationConfig.load[F])
+      conf <- Stream.eval(ApplicationConfig.load[F]("write-side-server"))
       xa <- Stream.eval(DatabaseConfig.dbTransactor[F](conf.db))
       _ <- Stream.eval(DatabaseConfig.initializeDb(xa))
       eventLog = EventLogDoobieInterpreter(xa)

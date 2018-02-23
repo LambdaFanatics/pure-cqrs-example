@@ -1,5 +1,3 @@
-package apps
-
 import java.util.UUID
 
 import cats.FlatMap

@@ -1,5 +1,4 @@
-package infrastructure.repository
-package inmemory
+package interpreter.memory
 
 import java.util.UUID
 

@@ -1,4 +1,4 @@
-package infrastructure.repository.doobie
+package interpreter.doobie
 
 import java.util.UUID
 

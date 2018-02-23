@@ -1,9 +1,9 @@
-package infrastructure.repository.doobie
+package interpreter.doobie
 
 import cats.Monad
 import cats.data.OptionT
 import cats.implicits._
-import domain._
+import domain.{Plant, PlantId, PlantStoreAlgebra}
 import doobie._
 import doobie.implicits._
 import doobie.postgres.implicits._

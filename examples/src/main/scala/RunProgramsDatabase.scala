@@ -1,16 +1,14 @@
-package apps
-
 import cats.effect.IO
 import config.{ApplicationConfig, DatabaseConfig}
-import infrastructure.repository.doobie.PlantStoreDoobieInterpreter
-
+import interpreter.doobie.PlantStoreDoobieInterpreter
+import programs._
 
 // TODO these should be converted to tests
 object  RunProgramsDatabase extends App {
-  import programs._
+
 
   val run = for {
-    conf <- ApplicationConfig.load[IO]
+    conf <- ApplicationConfig.load[IO]("read-side-server")
     xa <- DatabaseConfig.dbTransactor[IO](conf.db)
     _ <- DatabaseConfig.initializeDb(xa)  // This recreates and initializes the database
     repo = PlantStoreDoobieInterpreter(xa)
