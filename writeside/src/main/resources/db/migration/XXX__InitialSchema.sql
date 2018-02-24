@@ -1,7 +1,0 @@
-DROP TABLE IF EXISTS plants;
-
-CREATE TABLE plants (
-    id BIGSERIAL PRIMARY KEY,
-    name VARCHAR  UNIQUE NOT NULL,
-    country VARCHAR NOT NULL
-)

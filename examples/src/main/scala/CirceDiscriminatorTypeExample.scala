@@ -1,6 +1,6 @@
 import java.util.UUID
 
-import domain.events.{Event, PlantCreated}
+import domain.events.{Event, CarRegistered}
 import io.circe.generic.extras.{AutoDerivation, Configuration}
 import io.circe.syntax._
 
@@ -27,7 +27,7 @@ object CirceDiscriminatorTypeExample extends App {
   import Codec._
 
   val encoded = {
-     PlantCreated(UUID.randomUUID(), "FOO", "BAR").asInstanceOf[Event].asJson
+     CarRegistered(UUID.randomUUID(), "XYZ0001", "MAZDA").asInstanceOf[Event].asJson
   }
 
   println(s"Unwrapped Encoded: $encoded")

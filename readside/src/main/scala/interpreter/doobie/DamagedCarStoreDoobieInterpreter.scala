@@ -8,7 +8,6 @@ import doobie.implicits._
 import doobie.postgres.implicits._
 import cats.implicits._
 
-
 class DamagedCarStoreDoobieInterpreter[F[_]: Effect](val xa: Transactor[F]) extends DamagedCarStoreAlgebra[F]{
 
   private object queries {

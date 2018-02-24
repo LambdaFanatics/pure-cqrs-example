@@ -1,6 +1,0 @@
-DROP TABLE IF EXISTS events;
-
-CREATE TABLE events (
-    id BIGSERIAL PRIMARY KEY,
-    payload JSON NOT NULL
-)

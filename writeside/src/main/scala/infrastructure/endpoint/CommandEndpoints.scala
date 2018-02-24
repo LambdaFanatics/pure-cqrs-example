@@ -27,7 +27,7 @@ class CommandEndpoints [F[_]: Effect] extends Http4sDsl[F]{
         } yield res
 
         action.flatMap {
-          case Right(cmd) => Ok(cmd.asJson)
+          case Right(_) => Ok()
           case Left(error) => Conflict(error.asJson)
         }
 

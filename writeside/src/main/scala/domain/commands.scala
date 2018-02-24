@@ -9,9 +9,15 @@ object commands {
   case class RawCommand(category: String, operation: String, payload: Json)
 
   sealed trait Command extends Product with Serializable
+  final case class RegisterCar(regPlate: String, model: String) extends Command
+  final case class AddDamagedPart(carId: UUID, name: String) extends Command
+  final case class RemoveDamagedPart(id: UUID) extends Command
+  final case class RepairDamagedPart(id: UUID) extends Command
+  final case class RepairCar(id: UUID) extends Command
 
-  final case class CreatePlant(name: String, country: String) extends Command
-  final case class DeletePlant(id: UUID) extends Command
+
+
+
 
   // See issue and jsFiddle of https://github.com/circe/circe/issues/726
   object codec extends AutoDerivation {

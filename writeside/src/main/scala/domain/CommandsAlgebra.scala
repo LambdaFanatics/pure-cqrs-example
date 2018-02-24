@@ -6,6 +6,10 @@ import validations._
 import events._
 
 trait CommandsAlgebra[F[_]] {
-  def create(name: String, country: String): F[Either[ValidationError, Event]]
-  def delete(id: UUID): F[Either[ValidationError,Event]]
+  def registerCar(regPlate: String, model: String): F[Either[ValidationError, Event]]
+  def repairCar(id: UUID): F[Either[ValidationError, Event]]
+  def addDamagedPart(carId: UUID, name: String): F[Either[ValidationError,Event]]
+  def removeDamagedPart(id: UUID): F[Either[ValidationError, Event]]
+  def repairDamagedPart(id: UUID): F[Either[ValidationError, Event]]
+
 }
