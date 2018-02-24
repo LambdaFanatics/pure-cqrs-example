@@ -11,7 +11,7 @@ class ReadSideServer[F[_] : Effect] extends StreamApp[F] {
   def stream(args: List[String], requestShutdown: F[Unit]): fs2.Stream[F, StreamApp.ExitCode] =
     for {
       exitCode <- BlazeBuilder[F]
-        .bindHttp(8081)
+        .bindHttp(8080)
         .serve
     } yield exitCode
 }
