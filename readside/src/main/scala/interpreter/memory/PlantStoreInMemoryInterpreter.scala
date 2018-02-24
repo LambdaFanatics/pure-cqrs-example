@@ -8,7 +8,7 @@ import domain.{Plant, PlantId, PlantStoreAlgebra}
 
 import scala.collection.concurrent.TrieMap
 
-
+//TODO remove after domain changes
 class PlantStoreInMemoryInterpreter[F[_]: Applicative] extends PlantStoreAlgebra[F] {
 
   private val cache = new TrieMap[PlantId, Plant]

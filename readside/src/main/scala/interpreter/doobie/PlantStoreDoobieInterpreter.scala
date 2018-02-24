@@ -8,7 +8,7 @@ import doobie._
 import doobie.implicits._
 import doobie.postgres.implicits._
 
-
+//TODO remove after domain changes
 class PlantStoreDoobieInterpreter[F[_] : Monad](val xa: Transactor[F]) extends PlantStoreAlgebra[F] {
 
   private object PlantSQL {
