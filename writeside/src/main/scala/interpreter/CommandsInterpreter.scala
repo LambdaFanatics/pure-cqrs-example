@@ -11,33 +11,33 @@ class CommandsInterpreter[F[_] : Effect](elog: EventLogAlgebra[F], v: Validation
 
   def registerCar(regPlate: String, model: String): EitherT[F, ValidationError, Event] =
     for {
-      _ <- EitherT(v.checkThatCarIsNotRegistered(regPlate))
+      _ <- EitherT(v.attemptToRegisterCar(regPlate))
       event = CarRegistered(regPlate, model)
       ev <- liftF(elog.append(event))
     } yield ev
 
   def repairCar(regPlate: String): EitherT[F, ValidationError, Event] =
     for {
-      _ <- EitherT(v.checkThatCarIsRegistered(regPlate))
+      _ <- EitherT(v.attemptToRepairCar(regPlate))
       ev <- liftF(elog.append(CarRepaired(regPlate)))
     } yield ev
 
   def markPart(regPlate: String, part: String): EitherT[F, ValidationError, Event] =
     for {
-      _ <- EitherT(v.checkThatPartIsNotMarked(regPlate, part))
+      _ <- EitherT(v.attemptToMarkPart(regPlate, part))
       event = PartMarked(regPlate, part)
       ev <- liftF(elog.append(event))
     } yield ev
 
   def unmarkPart(regPlate: String, part: String): EitherT[F, ValidationError, Event] =
     for {
-      _ <- EitherT(v.checkThatPartIsMarked(regPlate, part))
+      _ <- EitherT(v.attemptToUnmarkPart(regPlate, part))
       ev <- liftF(elog.append(PartUnmarked(regPlate, part)))
     } yield ev
 
   def repairPart(regPlate: String, part: String): EitherT[F, ValidationError, Event] =
     for {
-      _ <- EitherT(v.checkThatPartIsMarked(regPlate, part))
+      _ <- EitherT(v.attemptToRepairPart(regPlate, part))
       ev <- liftF(elog.append(PartRepaired(regPlate, part)))
     } yield ev
 }

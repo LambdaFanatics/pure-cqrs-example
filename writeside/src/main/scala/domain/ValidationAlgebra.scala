@@ -6,14 +6,14 @@ import domain.validations._
 
 trait ValidationAlgebra[F[_]] {
 
-  def checkThatCarIsRegistered(regPlate: String): F[CarNotRegistered.type Either Unit]
+  def attemptToRegisterCar(regPlate: String): F[ValidationError Either Unit]
 
-  def checkThatCarIsNotRegistered(regPlate: String): F[CarAlreadyRegistered.type Either Unit]
+  def attemptToRepairCar(regPlate: String): F[ValidationError Either Unit]
 
-  def checkThatCarHasNoDamages(regPlate: String): F[CarHasDamagedParts.type Either Unit]
+  def attemptToUnmarkPart(regPlate: String, part: String): F[ValidationError Either Unit]
 
-  def checkThatPartIsMarked(regPlate: String, part: String): F[PartIsNotMarked.type Either Unit]
+  def attemptToMarkPart(regPlate: String, part: String): F[ValidationError Either Unit]
 
-  def checkThatPartIsNotMarked(regPlate: String, part: String): F[PartIsAlreadyMarked.type Either Unit]
+  def attemptToRepairPart(regPlate: String, part: String): F[ValidationError Either Unit]
 
 }

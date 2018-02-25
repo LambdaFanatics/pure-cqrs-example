@@ -16,5 +16,5 @@ object validations {
   case object CarNotRegistered extends ValidationError
   case object PartIsAlreadyMarked extends ValidationError
   case object PartIsNotMarked extends ValidationError
-  case object CarHasDamagedParts extends ValidationError
+  case object PartIsNotDamaged extends ValidationError
 }
