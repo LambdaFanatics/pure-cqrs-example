@@ -1,42 +1,28 @@
 package infrastructure.repository.inmemory
 
-import java.util.UUID
-
 import cats.Applicative
-import domain._
-
-import scala.collection.concurrent.TrieMap
 import cats.implicits._
-import validations._
+import domain._
+import domain.validations._
 
-
+// TODO implement actual validations
 class ValidationInMemoryInterpreter[F[_]: Applicative] extends ValidationAlgebra[F] {
 
+  def checkThatCarIsRegistered(regPlate: String): F[Either[validations.CarNotRegistered.type, Unit]] =
+    ().asRight[CarNotRegistered.type].pure[F]
 
-  // FIXME: Awfull implementation and API reimplement with something else (redis in memory, some other cache, or doobie or whatever...)
-  val cache = new TrieMap[UUID, String]
-
-
-  def put(p: PlantDescription): F[Unit] = {
-    //FIXME: Atomicity ...
-    cache.put(p._1 , p._2)
-    ()
-  }.pure[F]
+  def checkThatCarIsNotRegistered(regPlate: String): F[Either[CarAlreadyRegistered.type, Unit]] =
+    ().asRight[CarAlreadyRegistered.type].pure[F]
 
 
-  def delete(id: UUID): F[Unit] = {
-    cache.remove(id)
-    ()
-  }.pure[F]
+  def checkThatPartIsMarked(regPlate: String, part: String): F[Either[validations.PartIsNotMarked.type, Unit]] =
+    ().asRight[PartIsNotMarked.type].pure[F]
 
-  def checkPlantDoesNotExist(name: String): F[Either[PlantAlreadyExists.type, Unit]] =
-    cache.find(_._2 == name).toLeft(()).leftMap(_ => PlantAlreadyExists).pure[F]
+  def checkThatPartIsNotMarked(regPlate: String, part: String): F[Either[validations.PartIsAlreadyMarked.type, Unit]] =
+    ().asRight[PartIsAlreadyMarked.type].pure[F]
 
-
-
-  def checkPlantExists(id: UUID): F[Either[PlantDoesNotExist.type, PlantDescription]] =
-    cache.find(_._1 == id).toRight(PlantDoesNotExist).pure[F]
-
+  def checkThatCarHasNoDamages(regPlate: String): F[Either[validations.CarHasDamagedParts.type, Unit]] =
+    ().asRight[CarHasDamagedParts.type].pure[F]
 }
 
 object ValidationInMemoryInterpreter {

@@ -1,17 +1,19 @@
 package domain
 
-import java.util.UUID
 
-import validations._
+import domain.validations._
+
 
 trait ValidationAlgebra[F[_]] {
 
-  type PlantDescription = (UUID, String)
+  def checkThatCarIsRegistered(regPlate: String): F[CarNotRegistered.type Either Unit]
 
-  //FIXME: Awfull implementation and API reimplement
-  def put(p: (UUID, String)): F[Unit]
-  def delete(id: UUID): F[Unit]
+  def checkThatCarIsNotRegistered(regPlate: String): F[CarAlreadyRegistered.type Either Unit]
 
-  def checkPlantDoesNotExist(name: String): F[Either[PlantAlreadyExists.type, Unit]]
-  def checkPlantExists(id: UUID): F[Either[PlantDoesNotExist.type, PlantDescription]]
+  def checkThatCarHasNoDamages(regPlate: String): F[CarHasDamagedParts.type Either Unit]
+
+  def checkThatPartIsMarked(regPlate: String, part: String): F[PartIsNotMarked.type Either Unit]
+
+  def checkThatPartIsNotMarked(regPlate: String, part: String): F[PartIsAlreadyMarked.type Either Unit]
+
 }

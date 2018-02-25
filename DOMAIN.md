@@ -1,14 +1,20 @@
 ### Garage management domain
 
 #### Events 
-- CarRegistered,            A new car was registered to the garage
-- DamagedPartAdded          A damaged part of a car was identified
-- DamagedPartRemoved,       A previously damaged part of a car was removed
-- DamagedPartRepaired,      A damaged car part was repaired
-- CarRepaired,              The car was repaired- all the parts repaired
+- CarRegistered,            A new car has been registered to the garage
+- CarRepaired,              The car has been repaired
+- PartMarked,               A damaged part of a car marked to be repaired
+- PartUnmarked,             A previously marked part has been unmarked
+- PartRepaired,             A damaged part of a car has been repaired
+
 
 
 #### Commands
+- RegisterCar
+- RepairCar  
+- MarkPart
+- UnmarkPart
+- RepairPart
 
 #### Database 
 - events table, an append only events log - emulates a persistent log data structure

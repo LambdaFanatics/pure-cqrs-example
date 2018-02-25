@@ -1,16 +1,15 @@
 package domain
 
-import java.util.UUID
 
 import io.circe.generic.extras.AutoDerivation
 
 object events  {
   sealed trait Event extends Product with Serializable
-  final case class CarRegistered(id: UUID, regPlate: String, model: String) extends Event
-  final case class DamagedPartAdded(id: UUID, carId: UUID, name: String) extends Event
-  final case class DamagedPartRemoved(id: UUID) extends Event
-  final case class DamagedPartRepaired(id: UUID) extends Event
-  final case class CarRepaired(id: UUID) extends Event
+  final case class CarRegistered(regPlate: String, model: String) extends Event
+  final case class CarRepaired(regPlate: String) extends Event
+  final case class PartMarked(regPlate: String,  part: String) extends Event
+  final case class PartUnmarked(regPlate: String, part: String) extends Event
+  final case class PartRepaired(regPlate: String, part: String) extends Event
 
   /**
     * Here we provide a semi auto circe codec configuration b/c we need

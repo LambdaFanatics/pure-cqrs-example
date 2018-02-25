@@ -1,15 +1,17 @@
 package domain
 
-import java.util.UUID
-
-import validations._
-import events._
+import cats.data.EitherT
+import domain.events._
+import domain.validations._
 
 trait CommandsAlgebra[F[_]] {
-  def registerCar(regPlate: String, model: String): F[Either[ValidationError, Event]]
-  def repairCar(id: UUID): F[Either[ValidationError, Event]]
-  def addDamagedPart(carId: UUID, name: String): F[Either[ValidationError,Event]]
-  def removeDamagedPart(id: UUID): F[Either[ValidationError, Event]]
-  def repairDamagedPart(id: UUID): F[Either[ValidationError, Event]]
+  def registerCar(regPlate: String, model: String): EitherT[F, ValidationError, Event]
 
+  def repairCar(regPlate: String): EitherT[F, ValidationError, Event]
+
+  def markPart(regPlate: String, part: String): EitherT[F, ValidationError, Event]
+
+  def unmarkPart(regPlate: String, part: String): EitherT[F, ValidationError, Event]
+
+  def repairPart(regPlate: String, part: String): EitherT[F, ValidationError, Event]
 }

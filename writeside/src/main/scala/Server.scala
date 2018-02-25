@@ -1,12 +1,14 @@
 import cats.effect.{Effect, IO}
 import config.{ApplicationConfig, DatabaseConfig}
-import domain.{CommandsInterpreter, CommandsService}
+import domain.CommandsService
 import fs2.StreamApp.ExitCode
 import fs2.{Stream, StreamApp}
+import org.http4s.server.blaze.BlazeBuilder
 import infrastructure.endpoint.CommandEndpoints
 import infrastructure.repository.inmemory.ValidationInMemoryInterpreter
 import interpreter.doobie.EventLogDoobieInterpreter
-import org.http4s.server.blaze.BlazeBuilder
+import interpreter.CommandsInterpreter
+
 
 object Server extends StreamApp[IO] {
 
