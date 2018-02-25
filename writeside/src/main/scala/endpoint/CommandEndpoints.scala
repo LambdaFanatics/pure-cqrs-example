@@ -1,14 +1,13 @@
-package infrastructure.endpoint
+package endpoint
 
 import cats.effect.Effect
 import domain.CommandsService
-import org.http4s.{EntityDecoder, HttpService}
-import org.http4s.dsl.Http4sDsl
-import org.http4s.circe._
-import io.circe.syntax._
 import domain.commands.RawCommand
-
 import domain.commands.codec._
+import io.circe.syntax._
+import org.http4s.circe._
+import org.http4s.dsl.Http4sDsl
+import org.http4s.{EntityDecoder, HttpService}
 
 class CommandEndpoints [F[_]: Effect] extends Http4sDsl[F]{
 

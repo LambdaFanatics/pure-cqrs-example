@@ -1,4 +1,4 @@
-package infrastructure.repository.inmemory
+package interpreter.memory
 
 import cats.Applicative
 import cats.implicits._
