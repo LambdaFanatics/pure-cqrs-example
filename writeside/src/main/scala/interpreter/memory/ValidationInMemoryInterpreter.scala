@@ -42,7 +42,7 @@ class ValidationInMemoryInterpreter[F[_] : Effect] extends ValidationAlgebra[F] 
 
     def checkCarIsDamaged(regPlate: String) = StateT[Valid, Store, Car] { s =>
       s.get(regPlate).toRight(CarNotRegistered).flatMap ( car =>
-        if (car.parts.forall(_.damaged == false))
+        if (!car.parts.exists(_.damaged == true))
           CarNotDamaged.asLeft
         else
           (s, car).asRight
@@ -78,7 +78,7 @@ class ValidationInMemoryInterpreter[F[_] : Effect] extends ValidationAlgebra[F] 
     }
 
     def unmarkPart(c: Car, p: Part) = StateT[Valid,Store, Part] { s =>
-      val updated = c.copy(parts = c.parts.filter(_.name == p.name))
+      val updated = c.copy(parts = c.parts.filterNot(_.name == p.name))
       (s + (updated.regPlate -> updated), p).asRight[ValidationError]
     }
 
