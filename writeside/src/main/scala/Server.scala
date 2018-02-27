@@ -1,13 +1,13 @@
 import cats.effect.{Effect, IO}
 import config.{ApplicationConfig, DatabaseConfig}
-import domain.CommandsService
+import domain.{CommandsService, EventsValidationReplayService}
 import endpoint.CommandEndpoints
 import fs2.StreamApp.ExitCode
 import fs2.{Stream, StreamApp, async}
-import org.http4s.server.blaze.BlazeBuilder
-import interpreter.doobie.EventLogDoobieInterpreter
 import interpreter.CommandsInterpreter
+import interpreter.doobie.EventLogDoobieInterpreter
 import interpreter.memory.ValidationInMemoryInterpreter
+import org.http4s.server.blaze.BlazeBuilder
 
 
 object Server extends StreamApp[IO] {
@@ -18,18 +18,23 @@ object Server extends StreamApp[IO] {
     createStream[IO](args, shutdown)
 
   def createStream[F[_] : Effect](args: List[String], shutdown: F[Unit]): Stream[F, ExitCode] =
+    // TODO: We need a module in order to define all this dependency injection...
     for {
       conf <- Stream.eval(ApplicationConfig.load[F]("write-side-server"))
       xa <- Stream.eval(DatabaseConfig.dbTransactor[F](conf.db))
       _ <- Stream.eval(DatabaseConfig.initializeDb(xa))
-      eventLog = EventLogDoobieInterpreter(xa)        // This is needed for validation memory synchronization
+      eventLog = EventLogDoobieInterpreter(xa)                  // This is needed for validation memory synchronization
       validationSemaphore <- Stream.eval(async.semaphore(1))
       validation = ValidationInMemoryInterpreter[F](validationSemaphore)
       commands = CommandsInterpreter[F](eventLog, validation)
-      service = CommandsService[F](commands)
-      exitCode <- BlazeBuilder[F]
-        .bindHttp(8080, "localhost")
-        .mountService(CommandEndpoints.endpoints(service))
-        .serve
+      commandsService = CommandsService[F](commands)
+      replayService = EventsValidationReplayService(validation, eventLog)
+
+      exitCode <-
+        replayService.initializeState.as(ExitCode.Success) ++   // First run the replay service
+          BlazeBuilder[F]
+            .bindHttp(8080, "localhost")
+            .mountService(CommandEndpoints.endpoints(commandsService))
+            .serve
     } yield exitCode
 }
