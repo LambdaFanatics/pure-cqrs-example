@@ -5,6 +5,7 @@ import cats.effect.Effect
 import cats.implicits._
 import domain._
 import domain.validations.{CarNotDamaged, _}
+import fs2.async.mutable.Semaphore
 
 /**
   * In memory validator
@@ -13,7 +14,7 @@ import domain.validations.{CarNotDamaged, _}
   *
   * @tparam F
   */
-class ValidationInMemoryInterpreter[F[_] : Effect] extends ValidationAlgebra[F] {
+class ValidationInMemoryInterpreter[F[_] : Effect](semaphore: Semaphore[F]) extends ValidationAlgebra[F] {
 
   private object internal {
 
@@ -91,13 +92,21 @@ class ValidationInMemoryInterpreter[F[_] : Effect] extends ValidationAlgebra[F] 
       (s + (updated.regPlate -> updated), p).asRight[ValidationError]
     }
 
-    // FIXME handle concurrency issues (make thread safe)
-    def exec(state: StateT[Valid, Store, Unit]): F[Valid[Unit]] = Effect[F].delay (
+
+    private def exec(state: StateT[Valid, Store, Unit]): F[Valid[Unit]] = Effect[F].delay (
       state.run(internalState).map { case (newState, _) =>
-        internalState = newState // FIXME race condition without concurrency guard bad bad bad!!!
+        internalState = newState
         ()
       }
     )
+
+
+    def secureExec(state: StateT[Valid, Store, Unit]): F[Valid[Unit]] = for {
+      s <- Effect[F].delay(semaphore)
+      _ <- s.decrement
+      res <- exec(state)
+      _ <- s.increment
+    } yield res
   }
 
   import internal._
@@ -111,14 +120,14 @@ class ValidationInMemoryInterpreter[F[_] : Effect] extends ValidationAlgebra[F] 
     *
     * @return Either[ValidationError, Unit]
     */
-  def attemptToRegisterCar(regPlate: String): F[Either[ValidationError, Unit]] = exec {
+  def attemptToRegisterCar(regPlate: String): F[Either[ValidationError, Unit]] = secureExec {
     for {
       _ <- checkCarNotRegistered(regPlate)
       _ <- registerCar(regPlate)
     } yield ()
   }
 
-  def attemptToRepairCar(regPlate: String): F[Either[ValidationError, Unit]] =  exec {
+  def attemptToRepairCar(regPlate: String): F[Either[ValidationError, Unit]] =  secureExec {
     for {
       c <- checkCarRegistered(regPlate)
       c <- checkCarIsDamaged(c.regPlate)
@@ -126,7 +135,7 @@ class ValidationInMemoryInterpreter[F[_] : Effect] extends ValidationAlgebra[F] 
     } yield ()
   }
 
-  def attemptToMarkPart(regPlate: String, part: String): F[Either[ValidationError, Unit]] = exec {
+  def attemptToMarkPart(regPlate: String, part: String): F[Either[ValidationError, Unit]] = secureExec {
     for {
       c <- checkCarRegistered(regPlate)
       _ <- checkPartIsNotMarked(c.regPlate, part)
@@ -134,7 +143,7 @@ class ValidationInMemoryInterpreter[F[_] : Effect] extends ValidationAlgebra[F] 
     } yield ()
   }
 
-  def attemptToUnmarkPart(regPlate: String, part: String): F[Either[ValidationError, Unit]] = exec {
+  def attemptToUnmarkPart(regPlate: String, part: String): F[Either[ValidationError, Unit]] = secureExec {
     for {
       c <- checkCarRegistered(regPlate)
       p <- checkPartIsMarked(regPlate, part)
@@ -142,7 +151,7 @@ class ValidationInMemoryInterpreter[F[_] : Effect] extends ValidationAlgebra[F] 
     } yield ()
   }
 
-  def attemptToRepairPart(regPlate: String, part: String): F[Either[ValidationError, Unit]] = exec {
+  def attemptToRepairPart(regPlate: String, part: String): F[Either[ValidationError, Unit]] = secureExec {
     for {
       c <- checkCarRegistered(regPlate)
       p <- checkPartIsMarked(c.regPlate, part)
@@ -152,5 +161,5 @@ class ValidationInMemoryInterpreter[F[_] : Effect] extends ValidationAlgebra[F] 
 }
 
 object ValidationInMemoryInterpreter {
-  def apply[F[_] : Effect] = new ValidationInMemoryInterpreter[F]
+  def apply[F[_] : Effect](semaphore: Semaphore[F]) = new ValidationInMemoryInterpreter[F](semaphore)
 }

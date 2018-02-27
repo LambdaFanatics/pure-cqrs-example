@@ -3,7 +3,7 @@ import config.{ApplicationConfig, DatabaseConfig}
 import domain.CommandsService
 import endpoint.CommandEndpoints
 import fs2.StreamApp.ExitCode
-import fs2.{Stream, StreamApp}
+import fs2.{Stream, StreamApp, async}
 import org.http4s.server.blaze.BlazeBuilder
 import interpreter.doobie.EventLogDoobieInterpreter
 import interpreter.CommandsInterpreter
@@ -22,8 +22,9 @@ object Server extends StreamApp[IO] {
       conf <- Stream.eval(ApplicationConfig.load[F]("write-side-server"))
       xa <- Stream.eval(DatabaseConfig.dbTransactor[F](conf.db))
       _ <- Stream.eval(DatabaseConfig.initializeDb(xa))
-      eventLog = EventLogDoobieInterpreter(xa)
-      validation = ValidationInMemoryInterpreter[F]
+      eventLog = EventLogDoobieInterpreter(xa)        // This is needed for validation memory synchronization
+      validationSemaphore <- Stream.eval(async.semaphore(1))
+      validation = ValidationInMemoryInterpreter[F](validationSemaphore)
       commands = CommandsInterpreter[F](eventLog, validation)
       service = CommandsService[F](commands)
       exitCode <- BlazeBuilder[F]
