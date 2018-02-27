@@ -14,7 +14,8 @@ object validations {
   // Specific command validation errors
   case object CarAlreadyRegistered extends ValidationError
   case object CarNotRegistered extends ValidationError
-  case object PartIsAlreadyMarked extends ValidationError
-  case object PartIsNotMarked extends ValidationError
-  case object PartIsNotDamaged extends ValidationError
+  case object CarNotDamaged extends ValidationError
+  case object PartAlreadyMarked extends ValidationError
+  case object PartNotMarked extends ValidationError
+  case object PartNotDamaged extends ValidationError
 }

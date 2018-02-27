@@ -1,11 +1,10 @@
 package interpreter.memory
 
-import cats.data.State
+import cats.data.StateT
 import cats.effect.Effect
 import cats.implicits._
 import domain._
-import domain.validations._
-
+import domain.validations.{CarNotDamaged, _}
 
 /**
   * In memory validator
@@ -16,101 +15,140 @@ import domain.validations._
   */
 class ValidationInMemoryInterpreter[F[_] : Effect] extends ValidationAlgebra[F] {
 
-  // Internal interpreter model
-  private type Store = Map[String, Car]
+  private object internal {
 
-  private case class Part(name: String, damaged: Boolean)
+    // Internal interpreter model
+    type Store = Map[String, Car]
 
-  private case class Car(regPlate: String, parts: List[Part])
+    case class Part(name: String, damaged: Boolean)
 
-  /**
-    * The internal state is just a map of the cars hashed by regPlate
-    * Note: this is a var of an immutable data structure, updating directly this var is not thread safe.
-    * So we need a concurrent construct like mutex, semaphore, mvar to secure the access of the resource.
-    */
-  private var internalState: Store = Map.empty
+    case class Car(regPlate: String, parts: List[Part])
 
+    type Valid[A] = Either[ValidationError, A]
 
-  // TODO clean up code
-  // TODO use state combinators to remove the ugly if then else ...
-  private def registerCarValidation(regPlate: String) = State[Store, Either[ValidationError, Unit]] { s =>
-    if (s.contains(regPlate))
-      (s, CarAlreadyRegistered.asLeft)
-    else
-      (s + (regPlate -> Car(regPlate, List())), ().asRight)
-  }
+    /**
+      * The internal state is just a map of the cars hashed by regPlate
+      * Note: this is a var of an immutable data structure, updating directly this var is not thread safe.
+      */
+    var internalState: Store = Map.empty
 
-  private def repairCarValidation(regPlate: String) = State[Store, Either[ValidationError, Unit]] { s =>
-    if (!s.contains(regPlate))
-      (s, CarNotRegistered.asLeft)
-    else
-      (s.updated(regPlate, s(regPlate).copy(parts = Nil)), ().asRight)
-  }
-
-  private def markPartValidation(regPlate: String, part: String) = State[Store, Either[ValidationError, Unit]] { s =>
-    if (!s.contains(regPlate))
-      (s, CarNotRegistered.asLeft)
-    else if (s(regPlate).parts.exists(_.name == part))
-      (s, PartIsAlreadyMarked.asLeft)
-    else
-    // TODO propably need to use something like optics in order to clean up the mess, for now keep it like this
-      (s.updated(regPlate, s(regPlate).copy(parts = Part(part, damaged = true) :: s(regPlate).parts)), ().asRight)
-
-  }
-
-  private def repairPartValidation(regPlate: String, part: String) = State[Store, Either[ValidationError, Unit]] { s =>
-    if (!s.contains(regPlate))
-      (s, CarNotRegistered.asLeft)
-    else if (!s(regPlate).parts.exists(_.name == part))
-      (s, PartIsNotMarked.asLeft)
-    else if (s(regPlate).parts.find(_.name == part).get.damaged) { // TODO REMOVE OUCH !!!!
-      (s, PartIsNotDamaged.asLeft)
-    } else {
-      (s.updated(regPlate, s(regPlate).copy(parts = s(regPlate).parts.filter(_.name == part))), ().asRight)
+    def checkCarNotRegistered(regPlate: String) = StateT[Valid, Store, Unit] { s =>
+      s.get(regPlate).toLeft((s, ())).leftMap(_ => CarAlreadyRegistered)
     }
 
-  }
-
-  private def unmarkPartValidation(regPlate: String, part: String) = State[Store, Either[ValidationError, Unit]] { s =>
-    if (!s.contains(regPlate))
-      (s, CarNotRegistered.asLeft)
-    else if (!s(regPlate).parts.exists(_.name == part))
-      (s, PartIsNotMarked.asLeft)
-    else {
-      (s.updated(regPlate, s(regPlate).copy(parts = s(regPlate).parts.filter(_.name == part))), ().asRight)
+    def checkCarRegistered(regPlate: String) = StateT[Valid, Store, Car] { s =>
+      s.get(regPlate).toRight(CarNotRegistered).map(car => (s, car))
     }
 
+    def checkCarIsDamaged(regPlate: String) = StateT[Valid, Store, Car] { s =>
+      s.get(regPlate).toRight(CarNotRegistered).flatMap ( car =>
+        if (car.parts.forall(_.damaged == false))
+          CarNotDamaged.asLeft
+        else
+          (s, car).asRight
+      )
+    }
+
+    def checkPartIsMarked(regPlate: String, part: String) = StateT[Valid, Store, Part] { s =>
+      s.get(regPlate).toRight(CarNotRegistered).flatMap ( car =>
+        car.parts.find(_.name == part).toRight(PartNotMarked).map((s,_))
+      )
+    }
+
+    def checkPartIsNotMarked(regPlate: String, part: String) = StateT[Valid, Store, Unit] { s =>
+      s.get(regPlate).toRight(CarNotRegistered).flatMap ( car =>
+        car.parts.find(_.name == part).toLeft((s, ())).leftMap(_ => PartAlreadyMarked)
+      )
+    }
+
+    def registerCar(regPlate: String) = StateT[Valid, Store, Car] { s =>
+      val newCar = Car(regPlate, List())
+      (s + (regPlate -> newCar), newCar).asRight[ValidationError]
+    }
+
+    def repairCar(c: Car) =  StateT[Valid, Store, Car] { s =>
+      val repaired = c.copy( parts = c.parts.map(_.copy(damaged = false)))
+      (s + (repaired.regPlate -> repaired), repaired).asRight[ValidationError]
+    }
+
+    def markPart(c: Car, partName: String) = StateT[Valid,Store, Part] { s =>
+      val p = Part(partName, damaged = true)
+      val updated = c.copy(parts = p :: c.parts)
+      (s + (updated.regPlate -> updated), p).asRight[ValidationError]
+    }
+
+    def unmarkPart(c: Car, p: Part) = StateT[Valid,Store, Part] { s =>
+      val updated = c.copy(parts = c.parts.filter(_.name == p.name))
+      (s + (updated.regPlate -> updated), p).asRight[ValidationError]
+    }
+
+    def repairPart(c: Car, p: Part) = StateT[Valid,Store, Part] { s =>
+      val updated = c.copy(parts = c.parts.map{ each =>
+        if (each.name == p.name)
+          p.copy(damaged = false)
+        else each
+      })
+      (s + (updated.regPlate -> updated), p).asRight[ValidationError]
+    }
+
+    // FIXME handle concurrency issues (make thread safe)
+    def exec(state: StateT[Valid, Store, Unit]): F[Valid[Unit]] = Effect[F].delay (
+      state.run(internalState).map { case (newState, _) =>
+        internalState = newState // FIXME race condition without concurrency guard bad bad bad!!!
+        ()
+      }
+    )
   }
 
-  // FIXME handle concurrency issues (make thread safe)
-  private def exec(state: State[Store, Either[ValidationError, Unit]]): F[Either[ValidationError, Unit]] = Effect[F].delay {
-    val (newS, res) = state.run(internalState).value
-    internalState = newS // TODO race condition without concurrency guard bad bad bad!!!
-    res
-  }
+  import internal._
 
   /**
     * Attempt to register a car.
-    * The operation is tested against the validator state.
+    * The car is registered only if it is not already registered.
     * Note: that on success the internal state of the validator is updated.
     *
-    * @param regPlate registration plate of the car to register.
-    * @return An Either[CarAlreadyRegistered.type, Unit] indicating an invalid operation or success
+    * @param regPlate registration plate of the car.
+    *
+    * @return Either[ValidationError, Unit]
     */
-  def attemptToRegisterCar(regPlate: String): F[Either[ValidationError, Unit]] =
-    exec(registerCarValidation(regPlate))
+  def attemptToRegisterCar(regPlate: String): F[Either[ValidationError, Unit]] = exec {
+    for {
+      _ <- checkCarNotRegistered(regPlate)
+      _ <- registerCar(regPlate)
+    } yield ()
+  }
 
-  def attemptToRepairCar(regPlate: String): F[Either[ValidationError, Unit]] =
-    exec(repairCarValidation(regPlate))
+  def attemptToRepairCar(regPlate: String): F[Either[ValidationError, Unit]] =  exec {
+    for {
+      c <- checkCarRegistered(regPlate)
+      c <- checkCarIsDamaged(c.regPlate)
+      _ <- repairCar(c)
+    } yield ()
+  }
 
-  def attemptToMarkPart(regPlate: String, part: String): F[Either[ValidationError, Unit]] =
-    exec(markPartValidation(regPlate, part))
+  def attemptToMarkPart(regPlate: String, part: String): F[Either[ValidationError, Unit]] = exec {
+    for {
+      c <- checkCarRegistered(regPlate)
+      _ <- checkPartIsNotMarked(c.regPlate, part)
+      _ <- markPart(c, part)
+    } yield ()
+  }
 
-  def attemptToUnmarkPart(regPlate: String, part: String): F[Either[ValidationError, Unit]] =
-    exec(unmarkPartValidation(regPlate, part))
+  def attemptToUnmarkPart(regPlate: String, part: String): F[Either[ValidationError, Unit]] = exec {
+    for {
+      c <- checkCarRegistered(regPlate)
+      p <- checkPartIsMarked(regPlate, part)
+      _ <- unmarkPart(c, p)
+    } yield ()
+  }
 
-  def attemptToRepairPart(regPlate: String, part: String): F[Either[ValidationError, Unit]] =
-    exec(repairPartValidation(regPlate, part))
+  def attemptToRepairPart(regPlate: String, part: String): F[Either[ValidationError, Unit]] = exec {
+    for {
+      c <- checkCarRegistered(regPlate)
+      p <- checkPartIsMarked(c.regPlate, part)
+      _ <- repairPart(c, p)
+    } yield ()
+  }
 }
 
 object ValidationInMemoryInterpreter {
