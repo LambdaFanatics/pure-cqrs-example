@@ -4,6 +4,7 @@ object Dependencies {
 
   object Versions {
     val catsVersion = "1.0.1"
+    val catsMtlVersion = "0.2.1"
     val doobieVersion = "0.5.0"
     val flywayVersion = "5.0.0"
     val logbackVersion = "1.2.3"
@@ -21,6 +22,8 @@ object Dependencies {
 
     // FP related
     lazy val catsCore = "org.typelevel" %% "cats-core" % catsVersion
+    lazy val catsMtl=  "org.typelevel" %% "cats-mtl-core" % catsMtlVersion
+
 
     // Database related
     lazy val doobieCore = "org.tpolecat" %% "doobie-core" % doobieVersion
@@ -61,10 +64,11 @@ object Dependencies {
 
 
     // Bundles
+    lazy val catsBundle = Seq(catsCore, catsMtl)
     lazy val doobieBundle = Seq(doobieCore, doobieHikari, doobiePostgres, doobieTest)
     lazy val circeBundle = Seq(circeGeneric, circeLiteral, circeGenericExtras, circeOptics, circeParser, circeJava8)
     lazy val http4sBundle = Seq(http4sServer, http4sCirce, http4sDsl)
-    lazy val testingBundle = Seq(scalaTest, scalaCheck )
+    lazy val testingBundle = Seq(scalaTest, scalaCheck)
 
   }
 

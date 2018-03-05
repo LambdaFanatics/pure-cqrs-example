@@ -62,8 +62,8 @@ lazy val commonSettings: Seq[SettingsDefinition] = Seq(
   libraryDependencies ++= Libraries.doobieBundle
     ++ Libraries.http4sBundle
     ++ Libraries.circeBundle
+    ++ Libraries.catsBundle
     ++ Seq(
-    Libraries.catsCore,
     Libraries.logback,
     Libraries.pureConfig,
     Libraries.fs2Core,

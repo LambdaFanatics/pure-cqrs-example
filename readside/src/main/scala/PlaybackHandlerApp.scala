@@ -1,9 +1,9 @@
-import StreamUtils._
 import cats.effect.{Effect, IO}
 import config.{ApplicationConfig, DatabaseConfig}
 import fs2.StreamApp.ExitCode
 import fs2.{Stream, StreamApp}
 import interpreter.doobie.EventLogDoobieInterpreter
+import utils.stream._
 
 import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
