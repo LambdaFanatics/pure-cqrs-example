@@ -3,29 +3,28 @@ package domain
 
 object cars {
 
-  sealed trait DamageStatus extends Product with Serializable
+  sealed trait CarStatus extends Product with Serializable
 
-  case object Unknown extends DamageStatus
+  case object Unknown extends CarStatus
 
-  case object Damaged extends DamageStatus
+  case object Damaged extends CarStatus
 
-  case object Repaired extends DamageStatus
+  case object Repaired extends CarStatus
 
-  object DamageStatus {
-    def apply(name: String): DamageStatus = name match {
+  object CarStatus {
+    def apply(name: String): CarStatus = name match {
       case "UNKNOWN"  => Unknown
       case "DAMAGED"  => Damaged
       case "REPAIRED" => Repaired
     }
 
-    def nameOf(status: DamageStatus): String = status match {
+    def nameOf(status: CarStatus): String = status match {
       case Unknown  => "UNKNOWN"
       case Damaged  => "DAMAGED"
       case Repaired => "REPAIRED"
     }
   }
 
-  case class Car(regPlate: String, model: String, status: DamageStatus = Unknown)
 
-  case class CarPart(name: String, carPlate: String, status: DamageStatus = Damaged)
+  case class Car(regPlate: String, model: String, status: CarStatus = Unknown)
 }
