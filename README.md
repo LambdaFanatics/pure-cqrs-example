@@ -60,7 +60,7 @@ The domain of the project is an minimal garage management system.
 
 
 ### Resources 
-These are some of the stuff I use to learn and take inspiration from:
+These are some of the stuff we use to learn and take inspiration from:
 
 - [Free monads and event sourcing architecture](http://www.stephenzoio.com/free-monads-and-event-sourcing/)
 - [Introduction to tagless final](https://www.beyondthelines.net/programming/introduction-to-tagless-final/)
