@@ -45,6 +45,8 @@ The domain of the project is an minimal garage management system.
 
 [ ] Write side server testing
 
+[ ] Documentation
+
 ### Stack
 
 - Cats
