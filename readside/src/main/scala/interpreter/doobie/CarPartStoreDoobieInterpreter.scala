@@ -84,5 +84,8 @@ class CarPartStoreDoobieInterpreter extends CarPartStoreAlgebra[ConnectionIO] {
     queries.selectAll.to[List]
 }
 
+object CarPartStoreDoobieInterpreter {
+  def apply() = new CarPartStoreDoobieInterpreter()
+}
 
 

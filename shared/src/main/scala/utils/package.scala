@@ -1,5 +1,7 @@
 import cats.effect.{Effect, Sync}
-import cats.~>
+import cats.{Monad, ~>}
+import doobie.free.connection.ConnectionIO
+import doobie.util.transactor.Transactor
 import fs2.{Pipe, Scheduler, Stream}
 
 import scala.concurrent.ExecutionContext
@@ -31,8 +33,19 @@ package object utils {
 
     // Awesomeness from this great article
     // see https://www.beyondthelines.net/programming/introduction-to-tagless-final/
-    implicit class naturalTransformation[F[_],A](fa: F[A]) {
+    implicit class naturalTransformationOps[F[_],A](fa: F[A]) {
       def liftTo[G[_]](implicit trans: F ~> G): G[A] = trans(fa)
     }
+
+    /**
+      * Natural transformation of ConnectionIO[A] type  Monad[A] type.
+      *
+      * When the monad is an effect type (Future, IO, Task etc...) this essentially
+      * means execute the query (description) in a transaction and produce the result.
+      */
+    def connectionIOToMonad[F[_]: Monad](xa: Transactor[F]): ConnectionIO ~> F =
+      new (ConnectionIO ~> F) {
+        def apply[A](fa: ConnectionIO[A]): F[A] = xa.trans.apply(fa)
+      }
   }
 }

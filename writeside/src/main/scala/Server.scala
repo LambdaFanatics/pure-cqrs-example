@@ -24,8 +24,8 @@ class WriteSideServer[F[_]: Effect]  extends StreamApp[F]{
       conf <- Stream.eval(ApplicationConfig.load[F]("write-side-server"))
       xa <- Stream.eval(DatabaseConfig.dbTransactor[F](conf.db))
       _ <- Stream.eval(DatabaseConfig.initializeDb(xa))
-      eventLog = EventLogDoobieInterpreter(xa)                  // This is needed for validation memory synchronization
-      validationSemaphore <- Stream.eval(async.semaphore(1))
+      eventLog = EventLogDoobieInterpreter(xa)
+      validationSemaphore <- Stream.eval(async.semaphore(1)) // This is needed for validation memory synchronization
       validation = ValidationInMemoryInterpreter[F](validationSemaphore)
       commands = CommandsInterpreter[F](eventLog, validation)
       commandsService = CommandsService[F](commands)
