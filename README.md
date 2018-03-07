@@ -6,7 +6,7 @@ Hope there will be a series of articles describing the experience and the system
 
 ### Resources 
 
-These are some of the stuff I use to learn and take inspiration from:
+These are some of the resources that I use to learn and take inspiration from:
 
 - [Free monads and event sourcing architecture](http://www.stephenzoio.com/free-monads-and-event-sourcing/)
 - [Introduction to tagless final](https://www.beyondthelines.net/programming/introduction-to-tagless-final/)
