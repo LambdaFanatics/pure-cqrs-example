@@ -1,22 +1,21 @@
 import cats.effect.{Effect, IO}
 import config.{ApplicationConfig, DatabaseConfig}
 import domain.CarsStoreEventHandler
-import fs2.{StreamApp, _}
+import fs2._
 import interpreter.StoreInterpreter
 import interpreter.doobie.{CarPartStoreDoobieInterpreter, CarStoreDoobieInterpreter, EventLogDoobieInterpreter}
 import org.http4s.server.blaze.BlazeBuilder
 import utils.functional.connectionIOToMonad
 import doobie.implicits._  // This resolves Monad[ConnectionIO] ambiguous implicits somehow.
 
+import scala.concurrent.ExecutionContext.Implicits.global
 
 object Server extends ReadSideServer[IO]
 
-
 class ReadSideServer[F[_] : Effect] extends StreamApp[F] {
 
-  implicit val ec = scala.concurrent.ExecutionContext.global
 
-  def stream(args: List[String], requestShutdown: F[Unit]): fs2.Stream[F, StreamApp.ExitCode] =
+  def stream(args: List[String], requestShutdown: F[Unit]): Stream[F, StreamApp.ExitCode] =
 
     // TODO: We need a module in order to define all this dependency injection...
     for {
@@ -28,7 +27,7 @@ class ReadSideServer[F[_] : Effect] extends StreamApp[F] {
       partStore = CarPartStoreDoobieInterpreter()
       store = StoreInterpreter(carStore, partStore)
       storeEventHandler =  {
-        implicit val trans = execDbAction   // FIXME Confusing implicit declaration
+        implicit val trans = execDbAction   // FIXME Confusing implicits declaration
         CarsStoreEventHandler(store,eventLog)
       }
 
