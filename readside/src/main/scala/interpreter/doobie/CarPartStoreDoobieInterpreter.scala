@@ -20,7 +20,7 @@ class CarPartStoreDoobieInterpreter extends CarPartStoreAlgebra[ConnectionIO] {
     def insert(part: CarPart): Update0 =
       sql"""INSERT INTO car_parts
             (name, car_reg_plate, status)
-            VALUES  , ${part.name}, ${part.carPlate}, ${part.status})
+            VALUES  (${part.name}, ${part.carPlate}, ${part.status})
       """.update
 
 
