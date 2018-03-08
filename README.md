@@ -21,31 +21,31 @@ The domain of the project is an minimal garage management system.
 
 ### Project tasks and status
 
--[x] Write side server (that serves ES commands via REST API)
+- [x] Write side server (that serves ES commands via REST API)
 
--[x] Write side validator in memory store
+- [x] Write side validator in memory store
 
--[x] An event log (used for Event Sourcing) implemented in postgres
+- [x] An event log (used for Event Sourcing) implemented in postgres
 
--[ ] Read side server that serves a materialized view of the log (via REST API).
+- [ ] Read side server that serves a materialized view of the log (via REST API).
 
--[ ] Read side server websocket support
+- [ ] Read side server websocket support
 
--[ ] An alternative event log implemented using kafka
+- [ ] An alternative event log implemented using kafka
 
--[ ] Complete dockerized build process
+- [ ] Complete dockerized build process
 
--[ ] User authentication / authorization (using TSec?)
+- [ ] User authentication / authorization (using TSec?)
 
--[ ] A front SPA application (using Angular ?)
+- [ ] A front SPA application (using Angular ?)
 
--[ ] Nginx configuration as a reverse proxy for the read/write servers
+- [ ] Nginx configuration as a reverse proxy for the read/write servers
 
--[ ] Read side server testing
+- [ ] Read side server testing
 
--[ ] Write side server testing
+- [ ] Write side server testing
 
--[ ] Documentation
+- [ ] Documentation
 
 ### Stack
 
