@@ -9,7 +9,7 @@ import fs2._
 class ValidationReplayHandler[F[_] : Effect](v: ValidationAlgebra[F], elog: EventLogAlgebra[F]) {
 
   def initializeState: Stream[F, Unit] =
-    elog.consume().evalMap(ev => updateState(ev).map {
+    elog.consume("validation-handler", SeekBeginning, closeOnEnd = true).evalMap(ev => updateState(ev).map {
       //TODO log here
       case Left(err) => println(s"Error while recreating validation state event: $ev caused $err! POSSIBLE VALIDATION STORE INCONSISTENCY!")
       case _ => ()

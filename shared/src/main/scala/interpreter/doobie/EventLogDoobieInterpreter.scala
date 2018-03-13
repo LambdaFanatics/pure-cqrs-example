@@ -1,12 +1,11 @@
 package interpreter.doobie
 
-import java.util.UUID
 
-import cats.effect.Sync
+import cats.effect.Effect
 import cats.implicits._
-import domain.EventLogAlgebra
 import domain.events.Event
 import domain.events.codec._
+import domain.{EventLogAlgebra, LogOffset, SeekBeginning}
 import doobie._
 import doobie.free.connection.ConnectionIO
 import doobie.implicits._
@@ -17,45 +16,113 @@ import io.circe.parser._
 import io.circe.syntax._
 import org.postgresql.util.PGobject
 
-case class RawEvent(id: Option[Long], payload: Json)
 
-class EventLogDoobieInterpreter[F[_]: Sync](val xa: Transactor[F]) extends EventLogAlgebra[F] {
 
-  implicit val JsonMeta: Meta[Json] =
-    Meta.other[PGobject]("json").xmap[Json](
-      a => parse(a.getValue).leftMap[Json](e => throw e).merge,
-      a => {
-        val o = new PGobject
-        o.setType("json")
-        o.setValue(a.noSpaces)
-        o
-      }
-    )
+
+class EventLogDoobieInterpreter[F[_] : Effect](val xa: Transactor[F]) extends EventLogAlgebra[F] {
+
+  case class EventRow(id: Option[Long], payload: Json)
+
+  case class OffsetRow(consumerName: String, offset: Long)
 
   private object queries {
 
-    def append(event: RawEvent): ConnectionIO[RawEvent] = {
+    implicit val JsonMeta: Meta[Json] =
+      Meta.other[PGobject]("json").xmap[Json](
+        a => parse(a.getValue).leftMap[Json](e => throw e).merge,
+        a => {
+          val o = new PGobject
+          o.setType("json")
+          o.setValue(a.noSpaces)
+          o
+        }
+      )
+
+    def append(event: EventRow): ConnectionIO[EventRow] = {
       sql"""INSERT INTO events (payload) VALUES (${event.payload})"""
         .update
         .withUniqueGeneratedKeys[Long]("id")
-        .map(id => event.copy(id = Some(id)) )
+        .map(id => event.copy(id = Some(id)))
     }
 
 
-    val streamAll: Stream[ConnectionIO, RawEvent] =
-      sql"""select id, payload from events""".query[RawEvent].stream
+    def streamAll(offset: Long): Stream[ConnectionIO, EventRow] =
+      sql"""SELECT id, payload FROM events WHERE id > $offset ORDER BY id ASC""".query[EventRow].stream
+
+    def selectOffset(consumerName: String): Query0[OffsetRow] =
+      sql"""
+        SELECT consumer_name, log_offset
+        FROM event_consumers
+        WHERE comsumer_name = $consumerName
+      """.query
+
+    def insertOffset(consumerName: String, offset: Long): Update0 =
+      sql"""
+      INSERT INTO event_consumers (consumer_name, log_offset)
+      VALUES  ($consumerName, $offset)
+    """.update
+
+    def updateOffset(consumerName: String, offset: Long): Update0 =
+      sql"""
+      UPDATE event_consumers
+      SET log_offset = $offset
+      WHERE consumer_name = $consumerName
+    """.update
+
 
   }
 
-  def append(e: Event): F[Event] = queries.append(RawEvent(None, e.asJson)).transact(xa).as(e)
+  def append(e: Event): F[Event] = queries.append(EventRow(None, e.asJson)).as(e).transact(xa)
 
-  def consume(): fs2.Stream[F, Event] = queries.streamAll.transact(xa)
-      .map(_.payload.as[Event])           // Here we ignore the json parse errors
-      .collect { case Right(ev) => ev }
+  def consume(consumerName: String, from: LogOffset, closeOnEnd: Boolean): Stream[F, Event] = {
+    import utils.stream._
+    import scala.concurrent.duration._
+    import scala.concurrent.ExecutionContext.Implicits.global
 
-  def generateUID(): F[UUID] = Sync[F].delay(UUID.randomUUID())
+    val stream = consumeEvents(consumerName, from).afterLastElement { optEvt =>
+      optEvt.fold(().pure[F])(event => Effect[F].delay(println(s"Last event is $event")))
+    }
+
+    if(closeOnEnd)
+      stream
+    else
+      stream.repeatWithInterval(1.second)
+  }
+
+  private def consumeEvents(consumerName: String, offset: LogOffset): Stream[F, Event] =
+    (for {
+      maybeOffset <- consumerOffset(consumerName, offset)
+      es <- consumeFrom(maybeOffset.getOrElse(0))
+    } yield es) transact xa
+
+
+  private def consumeFrom(offset: Long): Stream[ConnectionIO, Event] =
+    queries.streamAll(offset)
+      .map(_.payload.as[Event])
+      .collect { case Right(ev) => ev } // Here we ignore the json parse errors
+
+  private def consumerOffset(consumerName: String, from: LogOffset): Stream[ConnectionIO, Option[Long]] = {
+    val offset: ConnectionIO[Option[Long]] =
+      if (from == SeekBeginning)
+        0L.some.pure[ConnectionIO]
+      else
+        getOffset(consumerName)
+
+    Stream.eval(offset)
+  }
+
+//  private def storeOffset(consumerName: String, offset: Long): ConnectionIO[Unit] = for {
+//    maybeOffset <- getOffset(consumerName)
+//    _ <- maybeOffset.fold(queries.insertOffset(consumerName, offset).run)(_ => queries.updateOffset(consumerName, offset).run)
+//  } yield ()
+
+
+  private def getOffset(consumerName: String): ConnectionIO[Option[Long]] =
+    queries.selectOffset(consumerName)
+      .option
+      .map(_.map(_.offset))
 }
 
 object EventLogDoobieInterpreter {
-  def apply[F[_] : Sync](xa: Transactor[F]) = new EventLogDoobieInterpreter(xa)
+  def apply[F[_] : Effect](xa: Transactor[F]) = new EventLogDoobieInterpreter(xa)
 }

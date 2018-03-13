@@ -1,21 +1,17 @@
 package domain
 
-import cats.effect.Effect
 import cats.{Monad, ~>}
 import domain.events._
 import cats.implicits._
 import utils.functional._
 import fs2._
-import utils.stream._
-
-import scala.concurrent.ExecutionContext
-import scala.concurrent.duration._
-
-class CarsStoreEventHandler[G[_] : Monad, F[_] : Effect](store: StoreAlgebra[G], elog: EventLogAlgebra[F])
-                                                        (implicit trans: G ~> F, ec: ExecutionContext) {
 
 
-  def process(): Stream[F, Unit] = loopWithInterval(elog.consume().evalMap(updateStore), 10.second)
+class CarsStoreEventHandler[G[_] : Monad, F[_]](store: StoreAlgebra[G], elog: EventLogAlgebra[F])
+                                                        (implicit trans: G ~> F) {
+
+
+  def process(): Stream[F, Unit] = elog.consume("store-handler", SeekEnd, closeOnEnd = false).evalMap(updateStore)
 
 
   def updateStore(ev: Event): F[Unit] = ev match {
@@ -32,6 +28,6 @@ class CarsStoreEventHandler[G[_] : Monad, F[_] : Effect](store: StoreAlgebra[G],
 }
 
 object CarsStoreEventHandler {
-  def apply[G[_] : Monad, F[_] : Effect](store: StoreAlgebra[G], elog: EventLogAlgebra[F])
-                                        (implicit trans: G ~> F, ec: ExecutionContext) = new CarsStoreEventHandler(store, elog)
+  def apply[G[_] : Monad, F[_]](store: StoreAlgebra[G], elog: EventLogAlgebra[F])
+                                        (implicit trans: G ~> F) = new CarsStoreEventHandler(store, elog)
 }

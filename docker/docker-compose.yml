@@ -4,7 +4,7 @@ services:
 
     # Using psql connect to this database with:
     #     psql -h 127.0.0.1 -p 5432  -U evlog  evlog
-   postgres-log:
+   postgres:
       image: postgres:9.5
       container_name: postgres-log
       environment:

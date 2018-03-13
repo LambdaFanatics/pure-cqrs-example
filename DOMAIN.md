@@ -17,5 +17,8 @@
 - RepairPart
 
 #### Database 
-- events table, an append only events log - emulates a persistent log data structure
-- damaged_cars table, read side view of the available cars.
+- events table, an append only events log - emulates a persistent log data structure.
+- event_consumers table, holds the current offset of each event log consumer (event handler). 
+- cars table, read side view of the available cars.
+- car_parts table, read side view of the damaged parts of the cars.
+

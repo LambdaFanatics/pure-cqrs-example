@@ -1,12 +1,12 @@
 import cats.effect.{Effect, IO}
 import config.{ApplicationConfig, DatabaseConfig}
+import domain.SeekBeginning
 import fs2.StreamApp.ExitCode
 import fs2.{Stream, StreamApp}
 import interpreter.doobie.EventLogDoobieInterpreter
 import utils.stream._
 
 import scala.concurrent.ExecutionContext
-import scala.concurrent.duration._
 
 object PlaybackHandlerApp extends StreamApp[IO] {
   implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
@@ -19,8 +19,7 @@ object PlaybackHandlerApp extends StreamApp[IO] {
       conf <- Stream.eval(ApplicationConfig.load[F]("read-side-server"))
       xa <- Stream.eval(DatabaseConfig.dbTransactor[F](conf.db))
       eventLog = EventLogDoobieInterpreter[F](xa)
-      readLogProgram =  eventLog.consume().through(logStrLn("consumer"))
-      _ <- loopWithInterval(readLogProgram, 1.second)
+      _ <- eventLog.consume("playback-handler", SeekBeginning, closeOnEnd = true).through(logStrLn("consumer"))
     } yield ExitCode.Success
   }
 }

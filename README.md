@@ -62,9 +62,17 @@ The domain of the project is an minimal garage management system.
 
 
 ### Resources 
-These are some of the stuff we use to learn and take inspiration from:
+These are some of online resources we use to learn and take inspiration from:
 
+#### About Functional Programming
 - [Free monads and event sourcing architecture](http://www.stephenzoio.com/free-monads-and-event-sourcing/)
 - [Introduction to tagless final](https://www.beyondthelines.net/programming/introduction-to-tagless-final/)
 - [Smart Backpacker App (core on Github)](https://github.com/SmartBackpacker/core)
 - [Scala Pet Store (on Github)](https://github.com/pauljamescleary/scala-pet-store)
+
+
+- [Cats Documentation](https://typelevel.org/cats/)
+- [Doobie Documentation](https://tpolecat.github.io/doobie/docs/01-Introduction.html)
+
+#### About CQRS
+- [Clarified CQRS](http://udidahan.com/wp-content/uploads/Clarified_CQRS.pdf)
