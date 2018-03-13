@@ -32,7 +32,7 @@ class WriteSideServer[F[_]: Effect]  extends StreamApp[F]{
       replayService = ValidationReplayHandler(validation, eventLog)
 
       exitCode <-
-        replayService.initializeState.as(ExitCode.Success) ++   // First run the replay service
+        replayService.initializeState().as(ExitCode.Success) ++   // First run the replay service
           BlazeBuilder[F]
             .bindHttp(8080, "localhost")
             .mountService(CommandEndpoints.endpoints(commandsService))

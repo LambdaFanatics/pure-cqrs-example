@@ -8,12 +8,14 @@ import fs2._
 
 class ValidationReplayHandler[F[_] : Effect](v: ValidationAlgebra[F], elog: EventLogAlgebra[F]) {
 
-  def initializeState: Stream[F, Unit] =
-    elog.consume("validation-handler", SeekBeginning, closeOnEnd = true).evalMap(ev => updateState(ev).map {
-      //TODO log here
-      case Left(err) => println(s"Error while recreating validation state event: $ev caused $err! POSSIBLE VALIDATION STORE INCONSISTENCY!")
-      case _ => ()
-    }).drain
+  def initializeState(): Stream[F, Unit] =
+    elog.consume("validation-handler", SeekBeginning, closeOnEnd = true)
+      .evalMap(ev =>
+        updateState(ev).map {
+          //TODO log here
+          case Left(err) => println(s"Error while recreating validation state event: $ev caused $err! POSSIBLE VALIDATION STORE INCONSISTENCY!")
+          case _ => ()
+        }).drain
 
   private def updateState(ev: Event): F[Either[ValidationError, Unit]] = ev match {
     case CarRegistered(plate, _) => v.attemptToRegisterCar(plate)
@@ -25,5 +27,5 @@ class ValidationReplayHandler[F[_] : Effect](v: ValidationAlgebra[F], elog: Even
 }
 
 object ValidationReplayHandler {
-  def apply[F[_] : Effect](v: ValidationAlgebra[F], elog: EventLogAlgebra[F] ) = new ValidationReplayHandler[F](v, elog)
+  def apply[F[_] : Effect](v: ValidationAlgebra[F], elog: EventLogAlgebra[F]) = new ValidationReplayHandler[F](v, elog)
 }
