@@ -3,14 +3,14 @@ import sbt._
 object Dependencies {
 
   object Versions {
-    val catsVersion = "1.0.1"
+    val catsVersion = "1.1.0"
     val catsMtlVersion = "0.2.1"
     val doobieVersion = "0.5.0"
     val flywayVersion = "5.0.0"
     val logbackVersion = "1.2.3"
     val pureConfigVersion = "0.9.0"
     val circeVersion = "0.9.1"
-    val fs2Version = "0.10.1"
+    val fs2Version = "0.10.3"
     val http4sVersion = "0.18.0"
     val scalaTest   = "3.0.3"
     val scalaCheck  = "1.13.4"
@@ -22,17 +22,13 @@ object Dependencies {
 
     // FP related
     lazy val catsCore = "org.typelevel" %% "cats-core" % catsVersion
-    lazy val catsMtl=  "org.typelevel" %% "cats-mtl-core" % catsMtlVersion
-
 
     // Database related
     lazy val doobieCore = "org.tpolecat" %% "doobie-core" % doobieVersion
     lazy val doobiePostgres = "org.tpolecat" %% "doobie-postgres" % doobieVersion
     lazy val doobieHikari = "org.tpolecat" %% "doobie-hikari" % doobieVersion
 
-
     lazy val flyway = "org.flywaydb" % "flyway-core" % flywayVersion
-    // lazy val doobieH2 = "org.tpolecat" %% "doobie-h2" % doobieVersion
 
     // Logging
     lazy val logback = "ch.qos.logback" % "logback-classic" % logbackVersion
@@ -56,20 +52,16 @@ object Dependencies {
     lazy val http4sCirce = "org.http4s" %% "http4s-circe" % http4sVersion
     lazy val http4sDsl = "org.http4s" %% "http4s-dsl" % http4sVersion
 
-
     // Testing
     lazy val scalaTest = "org.scalatest" %% "scalatest" % Versions.scalaTest % Test
     lazy val scalaCheck = "org.scalacheck" %% "scalacheck" % Versions.scalaCheck % Test
     lazy val doobieTest = "org.tpolecat" %% "doobie-scalatest" % doobieVersion % Test
 
-
     // Bundles
-    lazy val catsBundle = Seq(catsCore, catsMtl)
+    lazy val catsBundle = Seq(catsCore)
     lazy val doobieBundle = Seq(doobieCore, doobieHikari, doobiePostgres, doobieTest)
     lazy val circeBundle = Seq(circeGeneric, circeLiteral, circeGenericExtras, circeOptics, circeParser, circeJava8)
     lazy val http4sBundle = Seq(http4sServer, http4sCirce, http4sDsl)
     lazy val testingBundle = Seq(scalaTest, scalaCheck)
-
   }
-
 }
