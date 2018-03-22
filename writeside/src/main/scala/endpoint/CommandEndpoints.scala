@@ -8,10 +8,9 @@ import io.circe.syntax._
 import org.http4s.circe._
 import org.http4s.dsl.Http4sDsl
 import org.http4s.{EntityDecoder, HttpService}
+import cats.implicits._
 
 class CommandEndpoints [F[_]: Effect] extends Http4sDsl[F]{
-
-  import cats.implicits._
 
   implicit val commandDecoder: EntityDecoder[F, RawCommand] = jsonOf[F, RawCommand]
 

@@ -6,7 +6,7 @@ import domain.events._
 import domain.validations.ValidationError
 import fs2._
 
-class ValidatorReplayHandler[F[_] : Effect](v: ValidationAlgebra[F], elog: EventLogAlgebra[F]) {
+class ValidatorReplayHandler[F[_] : Effect](elog: EventLogAlgebra[F], v: ValidationAlgebra[F],) {
 
   def initializeState(): Stream[F, Unit] =
     elog.consume("validation-handler", SeekBeginning, closeOnEnd = true)
@@ -24,8 +24,4 @@ class ValidatorReplayHandler[F[_] : Effect](v: ValidationAlgebra[F], elog: Event
     case PartUnmarked(plate, part) => v.attemptToUnmarkPart(plate, part)
     case PartRepaired(plate, part) => v.attemptToRepairPart(plate, part)
   }
-}
-
-object ValidatorReplayHandler {
-  def apply[F[_] : Effect](v: ValidationAlgebra[F], elog: EventLogAlgebra[F]) = new ValidatorReplayHandler[F](v, elog)
 }

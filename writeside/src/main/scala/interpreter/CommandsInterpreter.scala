@@ -41,8 +41,3 @@ class CommandsInterpreter[F[_] : Effect](elog: EventLogAlgebra[F], v: Validation
       ev <- liftF(elog.append(PartRepaired(regPlate, part)))
     } yield ev
 }
-
-object CommandsInterpreter {
-  def apply[F[_] : Effect](eventLog: EventLogAlgebra[F], validation: ValidationAlgebra[F]) =
-    new CommandsInterpreter[F](eventLog, validation)
-}

@@ -160,6 +160,6 @@ class ValidationInMemoryInterpreter[F[_] : Effect](semaphore: Semaphore[F]) exte
   }
 }
 
-object ValidationInMemoryInterpreter {
-  def apply[F[_] : Effect](semaphore: Semaphore[F]) = new ValidationInMemoryInterpreter[F](semaphore)
-}
+//object ValidationInMemoryInterpreter {
+//  def apply[F[_] : Effect](semaphore: Semaphore[F]) = new ValidationInMemoryInterpreter[F](semaphore)
+//}

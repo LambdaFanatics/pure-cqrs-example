@@ -17,11 +17,11 @@ class WriteSideServer[F[_] : Effect] extends StreamApp[F] {
 
   def createStream(args: List[String], shutdown: F[Unit]): Stream[F, ExitCode] =
     for {
-      ctx <- Stream.eval(Context[F])
+      ctx <- Stream.eval(Module.init)
       _ <- Stream.eval(DatabaseConfig.initializeDb(ctx.xa))
       exitCode <-
         // First run the replay service & then start the server
-        ctx.replayService.initializeState().as(ExitCode.Success) ++
+        ctx.replayHandler.initializeState().as(ExitCode.Success) ++
           BlazeBuilder[F]
             .bindHttp(8080, "localhost")
             .mountService(CommandEndpoints.endpoints(ctx.commandsService))
