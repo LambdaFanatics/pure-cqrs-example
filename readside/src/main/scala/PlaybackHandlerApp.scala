@@ -16,9 +16,9 @@ object PlaybackHandlerApp extends StreamApp[IO] {
 
   def createStream[F[_] : Effect](args: List[String], shutdown: IO[Unit]): Stream[F,ExitCode] = {
     for {
-      conf <- Stream.eval(ApplicationConfig.load[F]("read-side-server"))
-      xa <- Stream.eval(DatabaseConfig.dbTransactor[F](conf.db))
-      eventLog = EventLogDoobieInterpreter[F](xa)
+      conf <- Stream.eval(ApplicationConfig.load("read-side-server"))
+      xa <- Stream.eval(DatabaseConfig.dbTransactor(conf.db))
+      eventLog = new EventLogDoobieInterpreter(xa)
       _ <- eventLog.consume("playback-handler", SeekBeginning, closeOnEnd = true).through(logStrLn("consumer"))
     } yield ExitCode.Success
   }

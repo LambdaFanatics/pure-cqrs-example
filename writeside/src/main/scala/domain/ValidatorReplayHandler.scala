@@ -6,7 +6,7 @@ import domain.events._
 import domain.validations.ValidationError
 import fs2._
 
-class ValidatorReplayHandler[F[_] : Effect](elog: EventLogAlgebra[F], v: ValidationAlgebra[F],) {
+class ValidatorReplayHandler[F[_] : Effect](elog: EventLogAlgebra[F], v: ValidationAlgebra[F]) {
 
   def initializeState(): Stream[F, Unit] =
     elog.consume("validation-handler", SeekBeginning, closeOnEnd = true)

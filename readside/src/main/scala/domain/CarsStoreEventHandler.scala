@@ -26,8 +26,3 @@ class CarsStoreEventHandler[G[_] : Monad, F[_]](store: StoreAlgebra[G], elog: Ev
     case PartRepaired(plate, part) => store.repairPart(plate, part).as(()).liftTo[F]
   }
 }
-
-object CarsStoreEventHandler {
-  def apply[G[_] : Monad, F[_]](store: StoreAlgebra[G], elog: EventLogAlgebra[F])
-                                        (implicit trans: G ~> F) = new CarsStoreEventHandler(store, elog)
-}

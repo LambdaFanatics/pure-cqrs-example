@@ -14,7 +14,7 @@ import scala.concurrent.ExecutionContext
 /**
   * This is manual dependency injection.
   */
-class Module[F[_]](config: ApplicationConfig, val  xa: HikariTransactor[F], sem: Semaphore[F]){
+class Module[F[_]: Effect](config: ApplicationConfig, val  xa: HikariTransactor[F], sem: Semaphore[F]){
 
   private lazy val eventLog: EventLogAlgebra[F] =
     new EventLogDoobieInterpreter[F](xa)
@@ -32,9 +32,8 @@ class Module[F[_]](config: ApplicationConfig, val  xa: HikariTransactor[F], sem:
     new ValidatorReplayHandler[F](eventLog, validations)
 }
 
-
-
 object Module {
+
   /**
     * This is an effectful way to initialize our module *
     */
@@ -46,9 +45,6 @@ object Module {
     xa <- DatabaseConfig.dbTransactor(config.db)
 
     sem  <- async.semaphore(1)
-
-
   } yield new Module(config, xa,  sem)
-
 }
 

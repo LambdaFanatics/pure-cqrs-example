@@ -5,7 +5,7 @@ object Dependencies {
   object Versions {
     val catsVersion = "1.1.0"
     val catsMtlVersion = "0.2.1"
-    val doobieVersion = "0.5.0"
+    val doobieVersion = "0.5.1"
     val flywayVersion = "5.0.0"
     val logbackVersion = "1.2.3"
     val pureConfigVersion = "0.9.0"

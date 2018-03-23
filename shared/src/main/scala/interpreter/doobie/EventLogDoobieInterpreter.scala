@@ -121,7 +121,3 @@ class EventLogDoobieInterpreter[F[_] : Effect](val xa: Transactor[F]) extends Ev
       .option
       .map(_.map(_.offset))
 }
-
-object EventLogDoobieInterpreter {
-  def apply[F[_] : Effect](xa: Transactor[F]) = new EventLogDoobieInterpreter(xa)
-}

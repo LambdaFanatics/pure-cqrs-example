@@ -11,8 +11,6 @@ import fs2.async.mutable.Semaphore
   * In memory validator
   *
   * The implementation is inspired by https://gist.github.com/channingwalton/2846428
-  *
-  * @tparam F
   */
 class ValidationInMemoryInterpreter[F[_] : Effect](semaphore: Semaphore[F]) extends ValidationAlgebra[F] {
 

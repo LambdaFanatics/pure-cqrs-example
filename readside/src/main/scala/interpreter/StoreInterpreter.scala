@@ -33,9 +33,3 @@ class StoreInterpreter[F[_]: Monad](carStore: CarStoreAlgebra[F], partStore: Car
     partStore.modify(regPlate, name) { part => part.copy(status = parts.Repaired) }
 }
 
-object StoreInterpreter {
-  def apply[F[_]: Monad](cs: CarStoreAlgebra[F], ps: CarPartStoreAlgebra[F]) =
-    new StoreInterpreter(cs, ps)
-}
-
-
