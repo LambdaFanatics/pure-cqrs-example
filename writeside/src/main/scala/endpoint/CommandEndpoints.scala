@@ -1,6 +1,7 @@
 package endpoint
 
 import cats.effect.Effect
+import cats.implicits._
 import domain.CommandsService
 import domain.commands.RawCommand
 import domain.commands.codec._
@@ -8,13 +9,12 @@ import io.circe.syntax._
 import org.http4s.circe._
 import org.http4s.dsl.Http4sDsl
 import org.http4s.{EntityDecoder, HttpService}
-import cats.implicits._
 
 class CommandEndpoints [F[_]: Effect] extends Http4sDsl[F]{
 
   implicit val commandDecoder: EntityDecoder[F, RawCommand] = jsonOf[F, RawCommand]
 
-  def placeCommandEndpoint(service: CommandsService[F]): HttpService[F] =
+  def placeCommand(service: CommandsService[F]): HttpService[F] =
     HttpService[F] {
       case req @ POST -> Root / "command" =>
 
@@ -30,7 +30,7 @@ class CommandEndpoints [F[_]: Effect] extends Http4sDsl[F]{
 
     }
 
-  def endpoints(service: CommandsService[F]): HttpService[F] = placeCommandEndpoint(service)
+  def endpoints(service: CommandsService[F]): HttpService[F] = placeCommand(service)
 }
 
 object CommandEndpoints {

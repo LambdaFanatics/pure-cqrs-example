@@ -71,9 +71,6 @@ lazy val commonSettings: Seq[SettingsDefinition] = Seq(
   )
 )
 
-lazy val root = project.in(file("."))
-  .aggregate(writeside, readside, shared, examples)
-
 lazy val writeside = project.in(file("writeside"))
   .settings(commonSettings: _*)
   .dependsOn(shared)
