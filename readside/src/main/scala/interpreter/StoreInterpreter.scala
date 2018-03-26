@@ -6,7 +6,7 @@ import domain._
 import domain.cars.Car
 import domain.parts.CarPart
 
-class StoreInterpreter[F[_]: Monad](carStore: CarStoreAlgebra[F], partStore: CarPartStoreAlgebra[F])
+class StoreInterpreter[F[_] : Monad](carStore: CarStoreAlgebra[F], partStore: CarPartStoreAlgebra[F])
   extends StoreAlgebra[F] {
 
   def registerCar(regPlate: String, model: String): F[Car] =
@@ -20,7 +20,7 @@ class StoreInterpreter[F[_]: Monad](carStore: CarStoreAlgebra[F], partStore: Car
     // This is an upsert (= insert or update)
     maybeUpdated <- partStore.modify(regPlate, name) { part => part.copy(status = parts.Damaged) }
     result <- maybeUpdated match {
-      case part:Some[CarPart] => part.pure[F]
+      case part: Some[CarPart] => part.pure[F]
       case None => partStore.create(CarPart(name, regPlate, status = parts.Damaged)).map(_.some)
     }
   } yield result
@@ -32,8 +32,11 @@ class StoreInterpreter[F[_]: Monad](carStore: CarStoreAlgebra[F], partStore: Car
   def repairPart(regPlate: String, name: String): F[Option[CarPart]] =
     partStore.modify(regPlate, name) { part => part.copy(status = parts.Repaired) }
 
-  override def fetchCarsWithParts(): F[List[(Car, List[CarPart])]] = List(
-    (Car("XXX", "MODEL", cars.Unknown), List[CarPart]())
-  ).pure[F]
+
+  def fetchCarsWithParts(): F[List[(Car, List[CarPart])]] =
+    // TODO implement correctly
+    List(
+      (Car("XXX", "MODEL", cars.Unknown), List[CarPart]())
+    ).pure[F]
 }
 
