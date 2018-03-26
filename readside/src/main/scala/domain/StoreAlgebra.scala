@@ -14,4 +14,7 @@ trait StoreAlgebra[F[_]] {
   def unmarkPart(regPlate: String, name: String): F[Option[CarPart]]
 
   def repairPart(regPlate: String, name: String): F[Option[CarPart]]
+
+  def fetchCarsWithParts(): F[List[(Car, List[CarPart])]]
+
 }

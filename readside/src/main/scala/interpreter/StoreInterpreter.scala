@@ -31,5 +31,9 @@ class StoreInterpreter[F[_]: Monad](carStore: CarStoreAlgebra[F], partStore: Car
 
   def repairPart(regPlate: String, name: String): F[Option[CarPart]] =
     partStore.modify(regPlate, name) { part => part.copy(status = parts.Repaired) }
+
+  override def fetchCarsWithParts(): F[List[(Car, List[CarPart])]] = List(
+    (Car("XXX", "MODEL", cars.Unknown), List[CarPart]())
+  ).pure[F]
 }
 

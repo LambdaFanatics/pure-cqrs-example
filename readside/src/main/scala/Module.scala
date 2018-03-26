@@ -1,14 +1,17 @@
-import config.{ApplicationConfig, DatabaseConfig}
-import domain._
-import doobie.hikari.HikariTransactor
-import interpreter.StoreInterpreter
-import interpreter.doobie.{CarPartStoreDoobieInterpreter, CarStoreDoobieInterpreter, EventLogDoobieInterpreter}
-import utils.functional.connectionIOToMonad
-import doobie.ConnectionIO
-import doobie.implicits._
 import cats._
 import cats.effect.Effect
 import cats.implicits._
+import config.{ApplicationConfig, DatabaseConfig}
+import domain._
+import doobie.ConnectionIO
+import doobie.hikari.HikariTransactor
+import doobie.implicits._
+import endpoint.CarEndpoints
+import interpreter.StoreInterpreter
+import interpreter.doobie.{CarPartStoreDoobieInterpreter, CarStoreDoobieInterpreter, EventLogDoobieInterpreter}
+import org.http4s.HttpService
+import service.CarService
+import utils.functional.connectionIOToMonad
 
 
 /**
@@ -21,16 +24,27 @@ class Module[F[_] : Effect](config: ApplicationConfig, val xa: HikariTransactor[
   private lazy val partStore =
     new CarPartStoreDoobieInterpreter()
 
-  private lazy val store: StoreInterpreter[ConnectionIO] =
+  private lazy val store =
     new StoreInterpreter(carStore, partStore)
 
   private lazy val eventLog =
     new EventLogDoobieInterpreter(xa)
 
-  private implicit val trans: ~>[ConnectionIO, F] = connectionIOToMonad(xa)
 
-  lazy val storeEventHandler =
+  private implicit val trans: ConnectionIO ~> F =
+    connectionIOToMonad(xa)
+
+  private lazy val carService: CarService[ConnectionIO, F] =
+    new CarService(store)
+
+  private lazy val carEndpoints =
+    new CarEndpoints(carService)
+
+  lazy val storeEventHandler: CarsStoreEventHandler[ConnectionIO, F] =
     new CarsStoreEventHandler(store, eventLog)
+
+  lazy val endpoints: HttpService[F] =
+    carEndpoints.endpoints()
 }
 
 object Module {

@@ -17,6 +17,7 @@ class ReadSideServer[F[_] : Effect] extends StreamApp[F] {
       _ <- Stream.eval(DatabaseConfig.initializeDb(ctx.xa))
       exitCode <- BlazeBuilder[F] // Start the server
         .bindHttp(8081)
+        .mountService(ctx.endpoints)
         .serve
         .concurrently(ctx.storeEventHandler.process()) //Start the store event handler in the background
     } yield exitCode
